@@ -11859,7 +11859,31 @@ window.VY = window.VY || {};
       const idle = units.filter(u => !u.path.length && !u.battle && u.org > u.maxOrg * 0.55);
       const byProv = new Map();
       for (const u of idle) { if (!byProv.has(u.prov)) byProv.set(u.prov, []); byProv.get(u.prov).push(u); }
+      // coordinated strikes: every idle stack next to a target joins the attack when together they are
+      // strong enough (towns, its own lost land and enemy armies first); an empty province needs one stack
+      const used = new Set();
+      const powOf = st => st.reduce((a, u) => a + Game.unitTypes[u.type].atk * Math.sqrt(u.men / 1000), 0);
+      const cand = new Map();
+      for (const [p] of byProv) for (const n of P()[p].neighbors) {
+        if (!enemies.has(pctrl(n)) && !foeAt.has(n)) continue;
+        if (allowed && !allowed(p, n)) continue;
+        if (!cand.has(n)) cand.set(n, []);
+        cand.get(n).push(p);
+      }
+      const value = n => { const k = P()[n].state, d = VY.STATE_DEFS[k]; return (d.cap === n ? 10 + d.vp : 0) + (G.states[k].owner === tag ? 25 : 0) + (foeAt.has(n) ? 12 : 0) + (goalStates.has(k) ? 25 : 0); };
+      for (const n of [...cand.keys()].sort((a, b) => value(b) - value(a))) {
+        const provs = cand.get(n).filter(p => !used.has(p));
+        if (!provs.length) continue;
+        const thP = (foeAt.get(n) || 0) * (TERRAIN_DEF[P()[n].terrain] || 1) * (1 + G.states[P()[n].state].fort * 0.12);
+        const pw = provs.reduce((a, p) => a + powOf(byProv.get(p)), 0);
+        if (thP > 0 && pw < thP * 1.1) continue;
+        for (const p of (thP > 0 ? provs : provs.slice(0, 1))) { used.add(p); for (const u of byProv.get(p)) Game.orderMove(u, n); }
+      }
       for (const [p, stack] of byProv) {
+        if (used.has(p)) continue;
+        // a town of ours with the enemy at its gates and nobody inside: go and hold it
+        const guard = Game.nearestProv(p, q => VY.STATE_DEFS[P()[q].state].cap === q && pctrl(q) === tag && P()[q].neighbors.some(m => foeAt.has(m)) && !G.units.some(e => e.prov === q && e.tag === tag));
+        if (guard >= 0 && Game.provKm(p, guard) < 160) { for (const u of stack) Game.orderMove(u, guard); continue; }
         let best = null, bs = -1e9;
         const myP = stack.reduce((a, u) => a + Game.unitTypes[u.type].atk * Math.sqrt(u.men / 1000), 0);
         for (const n of P()[p].neighbors) {
@@ -11870,7 +11894,7 @@ window.VY = window.VY || {};
           const Pn = P()[n], k = Pn.state;
           const thP = foes * (TERRAIN_DEF[Pn.terrain] || 1) * (1 + G.states[k].fort * 0.12);
           const ratio = myP / Math.max(0.5, thP);
-          let score = ratio * 10 + (VY.STATE_DEFS[k].cap === n ? VY.STATE_DEFS[k].vp * 0.8 + 4 : 0) + (goalStates.has(k) ? 25 : 0) - (P()[p].riverBorder[n] ? 4 : 0);
+          let score = ratio * 10 + (VY.STATE_DEFS[k].cap === n ? VY.STATE_DEFS[k].vp * 0.8 + 4 : 0) + (goalStates.has(k) ? 25 : 0) + (G.states[k].owner === tag ? 30 : 0) - (P()[p].riverBorder[n] ? 4 : 0);   // its own occupied land first
           if (ratio < (foes ? 1.15 : 0)) score -= 100;
           if (score > bs) { bs = score; best = n; }
         }
@@ -11879,7 +11903,7 @@ window.VY = window.VY || {};
           for (const u of (keep ? stack.slice(1) : stack)) Game.orderMove(u, best);
           continue;
         }
-        const tgt = nearestTarget(p, enemies, goalStates, foeAt);
+        const tgt = nearestTarget(p, enemies, goalStates, foeAt, tag);
         if (tgt >= 0 && (!allowed || allowed(p, tgt) || goalStates.has(P()[tgt].state))) {
           const path = Game.findPath(stack[0], tgt);
           if (path && path.length > 1) { const stop = path[path.length - 2]; for (const u of stack) Game.orderMove(u, stop); }
@@ -11930,15 +11954,22 @@ window.VY = window.VY || {};
     // stacks move together: the strongest stack in a province decides, everyone there follows
     const byProv = new Map();
     for (const u of ready) { if (!byProv.has(u.prov)) byProv.set(u.prov, []); byProv.get(u.prov).push(u); }
-    for (const [, stack] of byProv) {
-      for (const u of stack) {
-        const pow = atk(u);
-        let mode = u.mode, tgt = -1;
-        // out of supply: fall back to the nearest supplied ground before anything else
-        if (u.nosupply) {
-          const home = Game.nearestProv(u.prov, p => SUPPLY.has(p));
-          if (home >= 0 && Game.orderMove(u, home)) continue;
-        }
+    for (const [, stack0] of byProv) {
+      // out of supply: fall back to the nearest supplied ground before anything else
+      const stack = [];
+      for (const x of stack0) {
+        if (x.nosupply) { const home = Game.nearestProv(x.prov, p => SUPPLY.has(p)); if (home >= 0 && Game.orderMove(x, home)) continue; }
+        stack.push(x);
+      }
+      if (!stack.length) continue;
+      // the units standing together decide together, then split: one division for an empty province,
+      // just enough to beat the defenders of a held one, and the rest go on to the next target
+      let pool = stack.slice().sort((a, b) => atk(b) - atk(a));
+      for (let round = 0; pool.length && round < 12; round++) {
+        const u = pool[0];
+        const pow = pool.reduce((a, x) => a + atk(x), 0);
+        const cnt = {}; for (const x of pool) cnt[x.mode] = (cnt[x.mode] || 0) + 1;
+        let mode = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0], tgt = -1;
         const attack = n => foeAt.has(n) && threat(n) * 1.1 <= (hunt.get(n) || 0) + pow;
         // a front, not a snake: the target must touch at least two provinces we hold (a town, one)
         const ours = n => P()[n].neighbors.filter(m => { const c = pctrl(m); return c === me || Game.friends(c, me); }).length;
@@ -11947,8 +11978,9 @@ window.VY = window.VY || {};
         const liberate = n => !claimed.has(n) && G.states[P()[n].state].owner === me && threat(n) < pow * 1.2;
         const townFirst = (test, hops) => { const t = search(u, n => test(n) && isTown(n), hops); return t >= 0 ? t : search(u, test, Math.min(hops, 6)); };
         if (mode === 'auto') {
-          tgt = search(u, attack, 4);
-          if (tgt < 0) tgt = search(u, liberate, 7);
+          // our own occupied (striped) land comes first, then enemy armies near us, then new ground
+          tgt = search(u, liberate, 12);
+          if (tgt < 0) tgt = search(u, attack, 4);
           if (tgt < 0) tgt = townFirst(offense, 8);
         } else if (mode === 'offense') tgt = townFirst(offense, 10);
         else if (mode === 'liberate') { tgt = search(u, liberate, 25); if (tgt < 0) tgt = search(u, attack, 5); }
@@ -11965,23 +11997,95 @@ window.VY = window.VY || {};
             if (front >= 0) { const path = Game.findPath(u, front); if (path && path.length > 1) tgt = path[path.length - 2]; }
           }
         }
-        if (tgt < 0 || tgt === u.prov) continue;
-        if (Game.orderMove(u, tgt)) {
-          if (foeAt.has(tgt)) hunt.set(tgt, (hunt.get(tgt) || 0) + pow);
-          else claimed.add(tgt);
+        // too weak to strike yet: gather on the front facing our occupied land (or the nearest enemy army),
+        // where the other stacks gather too, and strike together from there
+        if (tgt < 0 && mode !== 'offense') {
+          let front = search(u, n => hostile(n) && G.states[P()[n].state].owner === me, 25);
+          if (front < 0) front = search(u, n => foeAt.has(n), 12);
+          if (front >= 0) { const path = Game.findPath(u, front); if (path && path.length > 1) tgt = path[path.length - 2]; }
         }
+        if (tgt < 0 || tgt === u.prov) break;
+        // a gathering point takes everyone; a target takes only what it needs
+        const gather = !hostile(tgt) && !foeAt.has(tgt);
+        const need = threat(tgt) * 1.3 - (hunt.get(tgt) || 0);
+        const send = [];
+        let acc = 0;
+        for (const x of pool) { if (!gather && send.length && acc >= need) break; send.push(x); acc += atk(x); }
+        let moved = 0;
+        for (const x of send) if (Game.orderMove(x, tgt)) moved++;
+        if (!moved) break;
+        if (foeAt.has(tgt)) hunt.set(tgt, (hunt.get(tgt) || 0) + acc); else claimed.add(tgt);
+        pool = pool.filter(x => !send.includes(x));
       }
     }
   };
 
-  function nearestTarget(from, enemies, goalStates, foeAt) {
+  // ------------------------------------------------------------ how wars end: conquest, capitulation, treaty
+  // Occupied (striped) land becomes the occupier's own when the country that lost it capitulates, when it
+  // is conquered whole, or when a treaty ends the war on the lines held. The historical wars of the other
+  // powers end with history's own treaties instead.
+  function offer(ev) {
+    const G = VY.G;
+    G.proc = G.proc || { plans: [], lastPlanYear: 0 };
+    G.proc.events = G.proc.events || {};
+    G.proc.events[ev.id] = ev; Game.EV[ev.id] = ev;
+    Game.fireEvent(ev.id, { force: true });
+  }
+  function capitulate(w, t, foes) {
+    const G = VY.G;
+    let n = 0;
+    G.states.forEach((s, k) => { if (s.owner === t && foes.includes(s.ctrl)) { Game.setOwner(k, s.ctrl, true); n++; } });
+    const gone = new Set(G.units.filter(u => u.tag === t).map(u => u.id));
+    if (gone.size) Game.deleteUnits(gone);
+    const side = w.a.includes(t) ? w.a : w.b;
+    if (side.length <= 1) Game.endWar(w, 'control', { silent: true }); else Game.makePeace({ name: w.name, only: t });
+    if (!G.fast) {
+      Game.log(`${Game.countryName(t)} is conquered and capitulates: ${n} district${n === 1 ? '' : 's'} pass to the victors.`, 'war');
+      if (VY.UI && foes.includes(G.player)) VY.UI.toast(`<b>${U.esc(Game.countryName(t))}</b> capitulates.`);
+    }
+  }
+  Game.warEndChecks = function () {
+    const G = VY.G, me = G.player;
+    for (const w of G.wars.slice()) {
+      const mine = w.a.includes(me) || w.b.includes(me);
+      if (w.camp && !mine) continue;
+      if (G.uprising && w.name === G.uprising.name) continue;
+      // a country whose every district is held by its enemies capitulates
+      for (const side of [w.a, w.b]) for (const t of side.slice()) {
+        if (t === me || (VY.COUNTRY_DEFS[t] || {}).offmap || !G.wars.includes(w)) continue;
+        const owned = G.states.filter(s => s.owner === t);
+        const foes = side === w.a ? w.b : w.a;
+        if (owned.length && owned.every(s => foes.includes(s.ctrl))) capitulate(w, t, foes);
+      }
+      if (!mine || !G.wars.includes(w) || G.fast) continue;
+      // a war clearly won or lost: the beaten side asks for peace on the lines held
+      const sc = Game.warScore(w, w.a.includes(me) ? 'a' : 'b'), age = G.day - w.start;
+      if (age < 90 || (w.offered && G.day - w.offered < 180)) continue;
+      const them = (w.a.includes(me) ? w.b : w.a).map(t => Game.countryName(t, true)).join(', ');
+      if (sc >= 50) {
+        w.offered = G.day;
+        offer({ id: `core_cap_${w.id}_${G.day}`, title: `${them} Asks for Peace`, pic: 'diplomacy', major: true,
+          desc: `Our armies hold so much of ${them}'s land that its government has sent envoys under a white flag. They offer peace on the lines our troops hold today: every district we occupy would become ours.\n\nThe generals say one more push could take more. The ministers say a war that is won should be ended before it is lost.`,
+          options: [{ text: 'Accept: what we hold is ours.', effects: { peace: { name: w.name, keep: 'control' }, unity: 5, pp: 30 } },
+            { text: 'Fight on.', effects: { unity: -2 } }] });
+      } else if (sc <= -50) {
+        w.offered = G.day;
+        offer({ id: `core_terms_${w.id}_${G.day}`, title: `${them} Offers Terms`, pic: 'diplomacy', major: true,
+          desc: `The war is going badly. ${them} offers peace on the lines its armies hold: every district of ours they occupy would be theirs, and the rest of the country would be left in peace.\n\nTo refuse is to risk losing everything; to accept is to sign away what our soldiers could not keep.`,
+          options: [{ text: 'Accept the terms.', effects: { peace: { name: w.name, keep: 'control' }, unity: -10 } },
+            { text: 'Refuse: we fight on.', effects: { unity: 3 } }] });
+      }
+    }
+  };
+
+  function nearestTarget(from, enemies, goalStates, foeAt, tag) {
     const G = VY.G;
     let best = -1, bd = 1e9;
     P().forEach((Pp, p) => {
       const c = pctrl(p);
       if (!enemies.has(c) && !foeAt.has(p)) return;
       const k = Pp.state, cap = VY.STATE_DEFS[k].cap === p;
-      const d = Game.provKm(from, p) - (goalStates.has(k) ? 150 : 0) - (cap ? VY.STATE_DEFS[k].vp * 2 : 0) - (foeAt.has(p) ? 40 : 0);
+      const d = Game.provKm(from, p) - (goalStates.has(k) ? 150 : 0) - (cap ? VY.STATE_DEFS[k].vp * 2 : 0) - (foeAt.has(p) ? 40 : 0) - (G.states[k].owner === tag ? 200 : 0);
       if (d < bd) { bd = d; best = p; }
     });
     return best;
@@ -12896,6 +13000,7 @@ window.VY = window.VY || {};
     Game.armyModeTick();
     Game.mobilizeTick();
     Game.campaignTick();
+    if (G.day % 7 === 0) Game.warEndChecks();
     if (G.uprising) Game.revoltTick();
     processQueues();
     Game.worldHistory();
@@ -13426,9 +13531,8 @@ window.VY = window.VY || {};
     if (!ok) return false;
     const enemies = side === 'a' ? w.b : w.a;
     if (type === 'take') {
-      G.states.forEach((s, k) => {
-        if (enemies.includes(s.owner) && s.ctrl === 'LIT' && (G.coreSet.includes(k) || VY.SELECTOR_SETS.claims.includes(VY.STATE_DEFS[k].id))) Game.setOwner(k, 'LIT', true);
-      });
+      // a treaty on the lines held: every district we occupy becomes ours
+      G.states.forEach((s, k) => { if (enemies.includes(s.owner) && s.ctrl === 'LIT') Game.setOwner(k, 'LIT', true); });
       Game.endWar(w, 'status_quo');
     } else if (type === 'surrender') Game.endWar(w, 'control');
     else Game.endWar(w, 'status_quo');
@@ -14715,7 +14819,7 @@ window.VY = window.VY || {};
           const sc = Game.warScore(w, w.a.includes('LIT') ? 'a' : 'b');
           it.appendChild(el('div', { class: 'subtle', style: { fontSize: '12.5px', margin: '4px 0' } }, `${w.name}: war score ${U.sign(sc)} (${G.day - w.start} days)`));
           btns.appendChild(el('button', { class: 'btn small', onclick: () => { if (!Game.offerPeace(w, 'white')) UI().toast('They refuse a white peace.'); UI().refresh(); P.side('diplomacy'); } }, 'White peace'));
-          btns.appendChild(el('button', { class: 'btn small', onclick: () => { if (!Game.offerPeace(w, 'take')) UI().toast('They will not give up land yet (war score 35 needed).'); UI().refresh(); P.side('diplomacy'); } }, 'Demand our lands'));
+          btns.appendChild(el('button', { class: 'btn small', onclick: () => { if (!Game.offerPeace(w, 'take')) UI().toast('They will not give up land yet (war score 35 needed).'); UI().refresh(); P.side('diplomacy'); } }, 'Peace: keep what we hold'));
           btns.appendChild(el('button', { class: 'btn small danger', onclick: () => { Game.offerPeace(w, 'surrender'); UI().refresh(); P.side('diplomacy'); } }, 'Capitulate'));
         }
       }
