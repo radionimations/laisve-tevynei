@@ -1419,7 +1419,7 @@ window.VY = window.VY || {};
     idx: i + 1, id: e.id, name: e.name, alt: e.alt || '', lat: e.town[0], lon: e.town[1],
     region: e.story ? e.region : 'w_' + e.adm0.toLowerCase(), zone: e.zone,
     pop: Math.round(e.pop * 1000), vp: e.vp, owner: e.owner, eth: fullEth(e.eth0 || e.eth), eth97: fullEth(e.eth), urbanLt: e.urbanLt || 0,
-    focus: !!e.story, adm0: e.adm0, tl: e.story ? null : e.tl,
+    focus: !!e.story, adm0: e.adm0, tl: e.tl || null,   // a story district's timeline starts in 1925: before that the story moves it
     aw: e.aw || 0, lit: e.story ? e.lit : (LIT0[e.adm0] || 5), gar: e.story ? e.gar : 1, fate: e.fate
   }));
   VY.ETH_KEYS = ETH_KEYS;
@@ -1577,6 +1577,101 @@ window.VY = window.VY || {};
     { date: '1918-11-01', holder: null, at: SERBIA_NORTH.concat(SERBIA_SOUTH, MONTENEGRO) },
     { date: '1918-11-11', holder: null, at: POLAND_NORTH.concat(POLAND_SOUTH, BALTIC_1918, BELARUS_1918, UKRAINE_GER, UKRAINE_AUS, WALLACHIA, DOBRUJA, [[50.75, 25.33]]) }
   ];
+})();
+
+</script>
+<script>
+// The Second World War on the map: the German occupation of the Soviet west in 1941-1942 and the Soviet
+// return in 1943-1945 (who holds a state, not who owns it). The annexations themselves (the partition of
+// Poland, the Soviet annexations of 1940, Bialystok and Grodno to East Prussia in 1941, Kaliningrad) come
+// from the timelines of the map. Entries with `story` also cover the story's own districts, but only while
+// someone other than the player owns them (a Lithuania that kept its independence is left to the story).
+window.VY = window.VY || {};
+VY.WORLD_OCC = VY.WORLD_OCC || [];
+(function () {
+  const LT_W = [[55.25, 22.29], [55.38, 23.12], [55.08, 22.77], [54.95, 23.05], [54.65, 23.03], [54.56, 23.35], [55.98, 22.25], [55.91, 21.84], [55.89, 21.24], [56.31, 22.34], [55.63, 22.93]];
+  const LT_C = [[54.90, 23.90], [54.69, 25.28], [54.64, 24.93], [54.63, 23.95], [54.40, 24.05], [55.29, 23.97], [54.22, 24.57], [54.17, 24.99], [54.31, 25.38], [55.25, 24.75], [55.93, 23.31]];
+  const LT_NE = [[55.73, 24.36], [56.20, 24.75], [55.96, 25.59], [55.73, 26.25], [55.50, 25.60], [55.53, 25.10], [55.23, 25.42], [55.13, 26.16], [56.24, 23.61]];
+  const LV = [[56.95, 24.11], [55.87, 26.54], [56.51, 21.01], [56.65, 23.72], [56.51, 27.33], [57.54, 25.43], [57.31, 25.27], [56.97, 21.97], [56.41, 24.19], [56.50, 25.86],
+    [56.66, 22.49], [57.39, 21.56], [56.85, 26.22], [57.18, 26.75], [57.78, 26.02], [57.42, 27.05], [56.55, 27.72], [55.90, 27.17], [56.97, 23.15], [57.25, 22.59], [57.51, 24.71]];
+  const COURLAND = [[56.51, 21.01], [57.39, 21.56], [56.97, 21.97], [56.66, 22.49], [57.25, 22.59], [56.97, 23.15]];
+  const LV_REST = LV.filter(p => !COURLAND.some(q => q[0] === p[0] && q[1] === p[1]));
+  const EE = [[59.44, 24.75], [58.38, 26.72], [58.38, 24.50], [59.38, 28.19], [58.94, 23.54], [58.36, 25.59], [59.35, 26.36], [58.25, 22.48], [57.83, 27.02], [58.89, 25.56]];
+  const BY_W = [[53.89, 25.30], [53.60, 25.83], [54.50, 26.92], [54.31, 26.84], [53.13, 26.01], [52.12, 26.10], [52.10, 23.70], [55.14, 27.69], [55.11, 26.83], [55.64, 27.04], [53.02, 27.55], [53.90, 27.56]];
+  const BY_E = [[53.14, 29.22], [53.90, 30.33], [55.19, 30.20], [55.49, 28.78], [54.23, 28.50], [54.51, 30.42], [52.05, 29.27]];
+  const GOMEL = [[52.43, 31.00]];
+  const UA_W = [[49.84, 24.03], [50.75, 25.33], [50.62, 26.25], [49.55, 25.59], [48.92, 24.71], [50.10, 25.73]];
+  const UA_C = [[50.25, 28.66], [49.23, 28.47], [49.42, 27.00], [50.45, 30.52], [51.49, 31.29], [49.44, 32.06], [48.51, 32.26]];
+  const UA_E = [[49.99, 36.23], [49.59, 34.55], [48.46, 35.04], [47.84, 35.14], [48.00, 37.80], [50.91, 34.80], [46.97, 32.00], [46.64, 32.61]];
+  const ODESA = [[46.48, 30.73], [47.03, 28.85]];
+  const CRIMEA = [[44.95, 34.10], [45.36, 36.47], [44.62, 33.53]];
+  const RU_NW = [[57.82, 28.33], [58.52, 31.27], [56.34, 30.53], [57.85, 29.95]];
+  const SMOLENSK = [[54.78, 32.05], [55.21, 34.30], [56.26, 34.33]];
+  const BRYANSK_ORYOL = [[53.25, 34.37], [52.97, 36.06], [51.73, 36.19]];
+  const MOSCOW_EDGE = [[56.86, 35.90], [54.51, 36.25], [55.50, 36.02]];
+  const SOUTH_1942 = [[47.24, 39.71], [51.67, 39.20], [50.60, 36.60]];
+  const EAST_PRUSSIA = [[55.08, 21.88], [54.63, 21.81], [54.71, 20.51], [54.29, 22.29], [53.78, 20.48], [54.10, 22.93], [54.38, 21.34]];
+  const MEMEL = [[55.71, 21.13], [55.34, 21.47], [55.07, 22.03]];
+  const POLAND_E = [[51.25, 22.57], [53.13, 23.16], [52.23, 21.01], [51.40, 21.15], [50.87, 20.63], [50.06, 19.94], [51.76, 19.46], [52.55, 19.70], [52.41, 16.93], [54.35, 18.65], [53.02, 18.60], [51.11, 17.03]];
+
+  // every entry of this war covers the story's districts too (never the player's own land)
+  const add = (...list) => VY.WORLD_OCC.push(...list.map(o => Object.assign({ story: true }, o)));
+  add(
+    // 22 June 1941: Barbarossa
+    { date: '1941-06-23', holder: 'GER', owner: 'SOV', at: LT_W, story: true },
+    { date: '1941-06-24', holder: 'GER', owner: 'SOV', at: LT_C, story: true },
+    { date: '1941-06-27', holder: 'GER', owner: 'SOV', at: LT_NE, story: true },
+    { date: '1941-06-28', holder: 'GER', owner: 'SOV', at: BY_W },
+    { date: '1941-06-30', holder: 'GER', owner: 'SOV', at: UA_W },
+    { date: '1941-07-08', holder: 'GER', owner: 'SOV', at: LV, story: true },
+    { date: '1941-07-16', holder: 'GER', owner: 'SOV', at: BY_E.concat(SMOLENSK.slice(0, 1), RU_NW.slice(0, 1)) },
+    { date: '1941-07-19', holder: 'GER', owner: 'SOV', at: UA_C.slice(0, 3) },
+    { date: '1941-08-19', holder: 'GER', owner: 'SOV', at: GOMEL.concat(RU_NW.slice(1)) },
+    { date: '1941-08-28', holder: 'GER', owner: 'SOV', at: EE, story: true },
+    { date: '1941-09-19', holder: 'GER', owner: 'SOV', at: UA_C.slice(3) },
+    { date: '1941-10-16', holder: 'ROM', owner: 'SOV', at: ODESA },
+    { date: '1941-10-24', holder: 'GER', owner: 'SOV', at: UA_E.concat(SMOLENSK.slice(1), BRYANSK_ORYOL, MOSCOW_EDGE) },
+    { date: '1941-11-16', holder: 'GER', owner: 'SOV', at: CRIMEA.slice(0, 2) },
+    // the Soviet winter counteroffensive before Moscow
+    { date: '1941-12-30', holder: null, at: MOSCOW_EDGE },
+    // 1942: Sevastopol, the drive to the Don and the Volga
+    { date: '1942-07-04', holder: 'GER', owner: 'SOV', at: CRIMEA.slice(2) },
+    { date: '1942-07-24', holder: 'GER', owner: 'SOV', at: SOUTH_1942 },
+    // 1943: after Stalingrad and Kursk
+    { date: '1943-02-14', holder: null, at: SOUTH_1942.concat(BRYANSK_ORYOL.slice(2)) },
+    { date: '1943-03-12', holder: null, at: SMOLENSK.slice(1) },
+    { date: '1943-08-23', holder: null, at: UA_E.slice(0, 2).concat(BRYANSK_ORYOL.slice(1, 2)) },
+    { date: '1943-09-25', holder: null, at: SMOLENSK.slice(0, 1).concat(BRYANSK_ORYOL.slice(0, 1), UA_E.slice(2, 6)) },
+    { date: '1943-11-06', holder: null, at: UA_C.slice(3).concat(GOMEL) },
+    { date: '1943-12-31', holder: null, at: UA_C.slice(0, 1).concat(UA_E.slice(6)) },
+    // 1944: the liberation of the Soviet west; Bagration; the Baltic offensive
+    { date: '1944-01-20', holder: null, at: RU_NW.slice(1, 3) },
+    { date: '1944-02-02', holder: null, at: UA_W.slice(1, 3) },
+    { date: '1944-03-20', holder: null, at: UA_C.slice(1, 3) },
+    { date: '1944-04-10', holder: null, at: ODESA },
+    { date: '1944-05-09', holder: null, at: CRIMEA },
+    { date: '1944-06-28', holder: null, at: BY_E },
+    { date: '1944-07-03', holder: null, at: BY_W },
+    { date: '1944-07-13', holder: null, at: LT_C.slice(1, 3).concat(LT_C.slice(5, 9)), story: true },
+    { date: '1944-07-23', holder: null, at: [RU_NW[0], RU_NW[3]] },
+    { date: '1944-07-27', holder: null, at: UA_W.slice(0, 1).concat(UA_W.slice(3), [LT_C[10]], LV.slice(1, 2)), story: true },
+    { date: '1944-07-24', holder: 'SOV', owner: 'GER', at: POLAND_E.slice(0, 2) },
+    { date: '1944-08-01', holder: null, at: LT_C.slice(0, 1).concat(LT_C.slice(3, 5), [LT_C[9]], LT_NE), story: true },
+    { date: '1944-09-22', holder: null, at: EE, story: true },
+    { date: '1944-10-10', holder: null, at: LT_W, story: true },
+    { date: '1944-10-13', holder: null, at: LV_REST, story: true },
+    // 1945: East Prussia, Memel, Poland; the Courland pocket holds out to the capitulation
+    { date: '1945-01-20', holder: 'SOV', owner: 'GER', at: POLAND_E.slice(2, 8).concat(EAST_PRUSSIA.slice(0, 1)) },
+    { date: '1945-01-28', holder: 'SOV', owner: 'GER', at: MEMEL, story: true },
+    { date: '1945-02-10', holder: 'SOV', owner: 'GER', at: EAST_PRUSSIA.slice(1).concat(POLAND_E.slice(8, 9)) },
+    { date: '1945-03-30', holder: 'SOV', owner: 'GER', at: POLAND_E.slice(9, 11) },
+    { date: '1945-05-07', holder: 'SOV', owner: 'GER', at: POLAND_E.slice(11) },
+    { date: '1945-05-09', holder: null, at: COURLAND, story: true },
+    // the peace settlement has handed the conquered German land to Poland and the Soviet Union (the timelines)
+    { date: '1945-08-02', holder: null, at: POLAND_E.concat(EAST_PRUSSIA, MEMEL), story: true },
+    // 2014: Russia seizes Crimea (the map keeps Ukraine as its owner: an occupation, not a change of sovereignty)
+    { date: '2014-03-18', holder: 'RUF', owner: 'UKR', at: [[44.95, 34.10]] }
+  );
 })();
 
 </script>
@@ -13050,6 +13145,846 @@ VY.EVENTS = VY.EVENTS || [];
 
 </script>
 <script>
+window.VY = window.VY || {};
+VY.EVENTS = VY.EVENTS || [];
+/*
+ * events_d.js - historical events, part D: the Second World War, 1939-09-02 to 1945-12-31 (ids hd_...).
+ * Vilnius returned and the Soviet bases, the ultimatum and annexation of 1940, the deportations of June
+ * 1941, the German occupation and the Holocaust, the Soviet return of 1944 and the partisan war's start.
+ * The war's map (the German occupation of 1941-1944, the Soviet advance) is js/data/world2.js.
+ *
+ * Contract flags SET here: hd_soviet_bases (the treaty of October 1939), hd_occupied_1940 (the Soviet
+ *   occupation accepted: the player is the underground again), hd_resisted_1940, hd_june_uprising,
+ *   hd_partisan_war (the armed resistance began in 1944).
+ * Contract flags READ here: hc_neutral_1939.
+ * Private flags: hd_cw_war.
+ * Spirits: s_hd_soviet_rule, s_hd_rescuers, s_hd_ostland, s_hd_exile.
+ * War names: 'Soviet-Lithuanian War of 1940', 'German Invasion of the Commonwealth', 'Soviet Invasion of the Commonwealth'.
+ */
+(function () {
+  'use strict';
+  const T = (base, extra) => Object.assign({}, base, extra);
+  const STATE = { phase: 'independent', notForm: 'commonwealth' };
+  const UNDER = { phase: 'occupation' };
+  const VILNIUS_1939 = ['vilnius', 'trakai', 'eisiskes', 'salcininkai'];
+  const SOV_WEST = ['gardinas', 'lyda', 'asmena', 'breslauja', 'vileika', 'naugardukas'];
+  const S_SOVIET = { id: 's_hd_soviet_rule', name: 'Soviet Rule', desc: 'The NKVD watches, the press is Moscow\'s, and every village has its informers.',
+    mods: { suspicionGain: 0.25, unrestGrowth: 0.1, assimilationResist: 0.1 } };
+
+  VY.EVENTS.push(
+    // ================================================================ 1939
+    { id: 'hd_red_army_vilnius_1939', title: 'The Red Army in Vilnius',
+      date: '1939-09-19', trigger: T(STATE, { ownerIs: { state: 'vilnius', tag: 'POL' }, exists: 'SOV', before: '1939-10-09' }),
+      pic: 'red_army',
+      desc: "On 17 September the Red Army crossed Poland's eastern border, as the secret protocol of August had foreseen, and today Soviet tanks entered Vilnius after a brief fight with its Polish defenders. Polish soldiers by the thousand cross the demarcation line into Lithuania and lay down their arms; the government interns them and opens its border to the refugees behind them.\n\nThe city Lithuania has claimed for nineteen years now belongs to Stalin. In Moscow, the Lithuanian foreign minister is invited to talk.",
+      options: [
+        { text: 'Intern the soldiers, shelter the refugees.',
+          effects: { unity: 2, funds: -20, log: 'The Red Army takes Vilnius; Polish soldiers and refugees cross into Lithuania.' } }
+      ] },
+
+    { id: 'hd_mutual_assistance_1939', title: 'Vilnius, at a Price',
+      date: '1939-10-10', trigger: T(STATE, { exists: 'SOV', not: { owns: 'vilnius' }, before: '1940-03-01' }),
+      major: true, pic: 'vilnius_old',
+      desc: "In the Kremlin, Stalin and Molotov have offered Lithuania a treaty of mutual assistance. The Soviet Union will hand over Vilnius and part of its region, some 6,880 square kilometres. In return Lithuania must allow twenty thousand Red Army soldiers to be stationed on its soil, at bases the Soviets choose.\n\nLatvia and Estonia have already signed similar treaties, without the gift. To accept is to let the Red Army in. To refuse is to lose Vilnius forever, and perhaps to face the Red Army anyway.",
+      options: [
+        { text: 'Sign: Vilnius is ours again.',
+          effects: { flag: 'hd_soviet_bases', transfer: { where: VILNIUS_1939, to: 'LIT' }, unity: 15, opinion: { tag: 'SOV', add: 15 },
+            removeSpirit: 's_hb_vilnius_lost',
+            units: [ { tag: 'SOV', type: 'infantry', where: ['alytus', 'prienai', 'kaunas', 'vilnius'], count: 4, name: 'Soviet Garrison' } ],
+            states: { where: VILNIUS_1939, awareness: 3 },
+            log: 'Lithuania signs the Mutual Assistance Treaty: Vilnius returns, and 20,000 Soviet soldiers take up bases in Lithuania. The Lithuanian army enters Vilnius on 28 October.' } },
+        { text: 'Refuse: no foreign garrisons on our soil.',
+          effects: { opinion: { tag: 'SOV', add: -25 }, unity: -5, pp: 20, log: 'Lithuania refuses Soviet bases, and Vilnius stays with the Soviets.' } }
+      ] },
+
+    { id: 'hd_vilnius_university_1939', title: 'The Capital Regained',
+      date: '1939-12-15', trigger: T(STATE, { owns: 'vilnius', flag: 'hd_soviet_bases', before: '1940-06-01' }),
+      pic: 'university',
+      desc: "Lithuanian soldiers have marched into Vilnius under the tricolour, and the government means to move there from Kaunas. The city it finds is Polish and Jewish more than Lithuanian, crowded with refugees from the war in Poland, and hostile: in late October street fights broke out between Polish youths and the Lithuanian police.\n\nThe Polish Stefan Batory University is closed and reopened as a Lithuanian one, its professors dismissed. In the cafés of Vilnius, the Lithuanians are called the new occupiers.",
+      options: [
+        { text: 'Lithuanize Vilnius, quickly.',
+          effects: { unity: 5, states: { where: VILNIUS_1939, urbanLt: 3, unrest: 8 }, log: 'The Lithuanian administration takes over Vilnius; the Polish university is closed.' } },
+        { text: 'Govern gently: Vilnius must belong to all its people.',
+          effects: { unity: -2, pp: 15, states: { where: VILNIUS_1939, unrest: -4 } } }
+      ] },
+
+    // ================================================================ 1940
+    { id: 'hd_ultimatum_1940', title: 'The Soviet Ultimatum',
+      date: '1940-06-14', trigger: T(STATE, { exists: 'SOV', before: '1940-12-31' }),
+      major: true, pic: 'red_army',
+      desc: "Just before midnight on 14 June, as German armies entered Paris, Molotov handed the Lithuanian foreign minister an ultimatum. Lithuania is accused of kidnapping Soviet soldiers from the bases and of plotting with Latvia and Estonia. It must arrest its Minister of the Interior and its chief of security police, form a new government 'friendly to the Soviet Union', and admit as many Soviet troops as Moscow chooses. The answer is due by ten in the morning.\n\nThe Red Army is already massed on the border and waiting at its bases inside the country. In the cabinet room in Kaunas, the head of state wants to fight; the generals say the army can resist for days at most, and no one will come to help.",
+      options: [
+        { text: 'Accept. No Lithuanian blood for a hopeless war.',
+          effects: { flag: 'hd_occupied_1940', removeUnits: { tag: 'LIT', fraction: 1 }, transfer: { where: 'player', to: 'SOV' }, form: 'movement', spirit: S_SOVIET, unity: -10,
+            log: 'Lithuania accepts the Soviet ultimatum. The Red Army occupies the country on 15 June; President Smetona leaves for Germany.' } },
+        { text: 'Refuse. We fight.',
+          effects: { flag: 'hd_resisted_1940', unity: 15,
+            war: { a: ['SOV'], b: ['LIT'], name: 'Soviet-Lithuanian War of 1940', goals: ['kaunas', 'vilnius', 'siauliai', 'panevezys'] },
+            units: [ { tag: 'SOV', type: 'infantry', where: SOV_WEST, count: 14, name: 'Red Army' }, { tag: 'SOV', type: 'artillery', where: ['lyda', 'asmena'], count: 3, name: 'Red Army Artillery' },
+              { tag: 'SOV', type: 'cavalry', where: ['gardinas', 'vileika'], count: 3, name: 'Red Army Cavalry' } ],
+            log: 'Lithuania rejects the Soviet ultimatum. The Red Army attacks.' } }
+      ] },
+
+    { id: 'hd_annexation_1940', title: 'The People\'s Seimas',
+      date: '1940-07-21', trigger: T(UNDER, { flag: 'hd_occupied_1940', before: '1940-12-31' }),
+      pic: 'cat_repression',
+      desc: "Under the eye of Stalin's envoy Vladimir Dekanozov, a 'People's Government' was installed in June, with the journalist Justas Paleckis at its head. On 14 and 15 July Lithuania voted for a 'People's Seimas' with a single list of candidates; the official count gave it more than 99 per cent. Today that Seimas, at its first sitting, has proclaimed a Soviet Socialist Republic and asked to be admitted to the Soviet Union, which Moscow will grant on 3 August.\n\nThe arrests have already begun: ministers, officers, party leaders, Riflemen, priests. The banks, the factories and the large farms are being nationalized. The litas will soon be replaced by the rouble.",
+      options: [
+        { text: 'Go underground.',
+          effects: { suspicion: 5, unity: 5, states: { where: 'core', network: 1 }, log: 'The People\'s Seimas proclaims the Lithuanian SSR; Lithuania is annexed to the Soviet Union on 3 August.' } },
+        { text: 'Keep the envoys abroad recognized: the West must not accept this.',
+          effects: { pp: 20, unity: 3,
+            spirit: { id: 's_hd_exile', name: 'The Diplomatic Service in Exile', desc: 'Lithuanian envoys in Washington, London and the Vatican keep the state alive on paper; the United States refuses to recognize the annexation.', mods: { awarenessGrowth: 0.05 } } } }
+      ] },
+
+    { id: 'hd_sugihara_1940', title: 'Visas for Life',
+      date: '1940-08-10', trigger: { ownerIs: { state: 'kaunas', tag: 'SOV' }, before: '1940-09-30' },
+      pic: 'emigrants',
+      desc: "Thousands of Jewish refugees from Poland have gathered outside the Japanese consulate in Kaunas. The Dutch consul Jan Zwartendijk has written in their papers that no visa is needed to enter the Dutch colony of Curaçao, and the Japanese consul, Chiune Sugihara, against his government's instructions, is writing transit visas through Japan by hand, day and night, before the consulates are closed by the new Soviet authorities.\n\nWith a Sugihara visa a family can cross the Soviet Union by train to Vladivostok and sail for Japan. Several thousand people will be saved this way.",
+      options: [
+        { text: 'Help the refugees with lodging and train fares.',
+          effects: { funds: -30, suspicion: 3, log: 'Consuls Sugihara and Zwartendijk issue visas that save thousands of Jewish refugees in Kaunas.' } },
+        { text: 'Pass the word through our network: the consulates close soon.',
+          effects: { suspicion: 5, states: { where: 'core', network: 1 } } }
+      ] },
+
+    // ================================================================ 1941
+    { id: 'hd_deportations_1941', title: 'The Night of 14 June',
+      date: '1941-06-14', trigger: T(UNDER, { ownerIs: { state: 'kaunas', tag: 'SOV' }, before: '1941-06-22' }),
+      major: true, pic: 'siberia',
+      desc: "Before dawn on 14 June, NKVD squads with lists began knocking on doors across Lithuania. In four days some seventeen thousand people, officials, officers, teachers, policemen, farmers and their wives, children and old parents, were loaded into cattle wagons at the railway stations. The men are separated from their families and sent to camps; the women and children to the Altai, Komi and the far north.\n\nMany will not survive the first winter. Those left behind count the empty houses, and wait for the next list.",
+      options: [
+        { text: 'Hide the people whose names are on the lists.',
+          effects: { suspicion: 12, unity: 8, states: { where: 'core', unrest: 10 }, log: 'The mass deportation of June 1941: some 17,000 people are deported from Lithuania to the Soviet interior.' } },
+        { text: 'Record every name, for the day the truth can be told.',
+          effects: { suspicion: 5, unity: 5, states: { where: 'core', awareness: 3 } } }
+      ] },
+
+    { id: 'hd_june_uprising_1941', title: 'The June Uprising',
+      date: '1941-06-23', trigger: T(UNDER, { ownerIs: { state: 'kaunas', tag: 'SOV' }, exists: 'GER', before: '1941-07-15' }),
+      major: true, pic: 'cat_uprising',
+      desc: "Yesterday Germany attacked the Soviet Union. This morning insurgents of the Lithuanian Activist Front seized the radio station in Kaunas and proclaimed the restoration of an independent Lithuania and a Provisional Government. Across the country Red Army units are retreating, and in town after town armed men with white armbands take over.\n\nThe Germans did not ask for this government, and will not keep it. And from the first days, armed men in white armbands, insurgents among them as well as criminals and men recruited by the Germans, have beaten, robbed and murdered their Jewish neighbours: in Kaunas, at Slobodka and in the yard of the Lietūkis garage, under German eyes.",
+      options: [
+        { text: 'Proclaim independence, and order an end to the killing of Jews.',
+          effects: { flag: 'hd_june_uprising', unity: 8, suspicion: -10, log: 'The June Uprising: a Provisional Government proclaims the restoration of independence as the Red Army retreats.' } },
+        { text: 'Stay out of it: the Germans are no liberators.',
+          effects: { unity: -4, suspicion: -5 } }
+      ] },
+
+    { id: 'hd_ostland_1941', title: 'Generalbezirk Litauen',
+      date: '1941-08-05', trigger: T(UNDER, { before: '1941-12-31' }),
+      pic: 'german_army',
+      desc: "The Germans have dissolved the Provisional Government after six weeks. Lithuania is a 'general district' of the Reichskommissariat Ostland, under a German Generalkommissar, Adrian von Renteln, in Kaunas; Lithuanian 'general counsellors' may administer the country under German orders. The land the Soviets nationalized is not given back; it belongs to the Reich now.\n\nThe men who rose in June wanted a state. They have been given a new occupier.",
+      options: [
+        { text: 'Build an underground press against the Germans.',
+          effects: { flag: 'hd_anti_german', states: { where: 'core', network: 1, awareness: 2 }, suspicion: 5,
+            spirit: { id: 's_hd_ostland', name: 'Ostland', desc: 'German civil administration and police rule a Lithuania that is not allowed to exist.', mods: { suspicionGain: 0.15, fundsMonthly: -3 } },
+            log: 'The Germans dissolve the Provisional Government; Lithuania becomes part of the Reichskommissariat Ostland.' } },
+        { text: 'Bend, and keep the schools and the cooperatives Lithuanian.',
+          effects: { suspicion: -5, states: { where: 'core', literacy: 1 },
+            spirit: { id: 's_hd_ostland', name: 'Ostland', desc: 'German civil administration and police rule a Lithuania that is not allowed to exist.', mods: { suspicionGain: 0.1, fundsMonthly: -3 } } } }
+      ] },
+
+    { id: 'hd_holocaust_1941', title: 'Paneriai and the Ninth Fort',
+      date: '1941-11-30', trigger: { controllerIs: { state: 'kaunas', tag: 'GER' }, before: '1942-06-01' },
+      major: true, pic: 'forest',
+      desc: "Since the summer, German Einsatzkommando 3 under Karl Jäger, with Lithuanian police battalions and the Vilnius Special Squad, has been murdering the Jews of Lithuania. Town by town, whole communities have been marched to pits in nearby woods and shot: in the forest of Paneriai outside Vilnius, at the Ninth Fort of Kaunas, where 9,200 people were killed on 29 October alone, in some two hundred places across the country. Jäger's own report, written in December, counts 137,346 dead. Many Lithuanians did the shooting, guarded the pits, or took the victims' houses.\n\nThe Jews who are still alive are locked in the ghettos of Vilnius, Kaunas and Šiauliai. Of some two hundred thousand Lithuanian Jews, barely one in twenty will survive the war. A few hundred Lithuanian families, at the risk of their own lives, hide Jews in barns, cellars and monasteries.",
+      options: [
+        { text: 'Hide those who come to our door.',
+          effects: { suspicion: 15, funds: -20, flag: 'hd_rescuers',
+            spirit: { id: 's_hd_rescuers', name: 'Those Who Hid Others', desc: 'Families of the movement hide Jews from the killers, at the risk of their lives.', mods: { suspicionGain: 0.1 } },
+            log: 'The Holocaust in Lithuania: by December 1941 most Lithuanian Jews outside the ghettos have been murdered.' } },
+        { text: 'Forge papers and baptismal certificates for the children.',
+          effects: { suspicion: 10, funds: -15, flag: 'hd_rescuers', log: 'The Holocaust in Lithuania: by December 1941 most Lithuanian Jews outside the ghettos have been murdered.' } },
+        { text: 'Write down what is happening, so the world will know.',
+          effects: { suspicion: 8, states: { where: 'core', awareness: 1 }, log: 'The Holocaust in Lithuania: by December 1941 most Lithuanian Jews outside the ghettos have been murdered.' } }
+      ] },
+
+    // ================================================================ 1943-1944
+    { id: 'hd_stutthof_1943', title: 'No Legion for the SS',
+      date: '1943-03-17', trigger: { controllerIs: { state: 'kaunas', tag: 'GER' }, before: '1943-12-31' },
+      pic: 'cat_repression',
+      desc: "The Germans called on Lithuanian men to form an SS legion, as Latvia and Estonia have. Almost no one came: the underground press told them not to, and the general counsellors dragged their feet. The occupation authorities have answered by closing the universities in Kaunas and Vilnius and arresting forty-six intellectuals, professors, priests and officials, who are sent to the Stutthof concentration camp.\n\nThe boycott is the largest act of defiance the Germans have met in Lithuania.",
+      options: [
+        { text: 'The boycott holds.',
+          effects: { unity: 8, suspicion: 6, log: 'Lithuania boycotts the SS legion; the Germans close the universities and send 46 hostages to Stutthof.' } }
+      ] },
+
+    { id: 'hd_ghettos_1943', title: 'The End of the Vilnius Ghetto',
+      date: '1943-09-24', trigger: { controllerIs: { state: 'kaunas', tag: 'GER' }, before: '1944-06-01' },
+      pic: 'cat_repression',
+      desc: "The Germans have liquidated the Vilnius ghetto. In two days its last inhabitants were driven out: the able-bodied men to labour camps in Estonia, women to camps in Latvia, the children, the old and the sick to the death camps or the pits of Paneriai. The fighters of the United Partisan Organization, who meant to fight in the ghetto, escaped through the sewers to the Rūdninkai and Naroch forests.\n\nThe Kaunas and Šiauliai ghettos have become concentration camps. Some of their prisoners are still being smuggled out to hiding places in the countryside.",
+      options: [
+        { text: 'Guide the escapees to the forests.',
+          effects: { suspicion: 10, flag: 'hd_rescuers', log: 'The Germans liquidate the Vilnius ghetto; its fighters escape to the forests.' } },
+        { text: 'Shelter those smuggled out of the Kaunas camp.',
+          effects: { suspicion: 12, funds: -20, flag: 'hd_rescuers' } }
+      ] },
+
+    { id: 'hd_local_force_1944', title: 'The Local Detachment',
+      date: '1944-02-16', trigger: { controllerIs: { state: 'kaunas', tag: 'GER' }, before: '1944-06-30' },
+      pic: 'plechavicius',
+      desc: "With the Red Army at the old border, the Germans have let General Povilas Plechavičius form a Lithuanian force under Lithuanian officers, to defend the country and fight the Soviet partisans. Nearly twenty thousand volunteers answered his call in weeks, far more than he could arm.\n\nThe Germans want them as their own soldiers and labour; Plechavičius wants a Lithuanian army for the day the Germans go. Within months one of them will have to give way.",
+      options: [
+        { text: 'Volunteer, for Lithuania and not for Germany.',
+          effects: { manpower: -1500, unity: 6, log: 'General Plechavičius forms the Local Lithuanian Detachment; the Germans disband it in May and arrest its staff.' } },
+        { text: 'Hide the young men from both armies.',
+          effects: { suspicion: 4, unity: 2 } }
+      ] },
+
+    { id: 'hd_soviet_return_1944', title: 'The Front Returns',
+      date: '1944-10-15', trigger: { ownerIs: { state: 'kaunas', tag: 'SOV' }, controllerIs: { state: 'kaunas', tag: 'SOV' }, phase: 'occupation', before: '1945-06-30' },
+      major: true, pic: 'red_army',
+      desc: "The Red Army took Vilnius on 13 July after five days of street fighting, helped by the Polish Home Army, whose officers the NKVD then arrested. Kaunas fell on 1 August, and this month the front has reached the Baltic coast; only Klaipėda and Courland still hold out. Tens of thousands of Lithuanians, farmers, teachers, priests, writers, took the roads west with the retreating Germans rather than live under the Soviets again.\n\nThose who stayed know what is coming: conscription into the Red Army, arrests, collective farms. In the forests, men who hid from the Germans and men who deserted the German-raised units are gathering rifles. The partisan war is beginning.",
+      options: [
+        { text: 'To the forests: the partisan war.',
+          effects: { flag: 'hd_partisan_war', unity: 10, uprising: { name: 'The Partisan War', scale: 1.2 }, log: 'The Red Army returns to Lithuania; the partisan war against the Soviet occupation begins.' } },
+        { text: 'Go west with the refugees.',
+          effects: { manpower: -2000, unity: -5, suspicion: -10,
+            spirit: { id: 's_hd_exile', name: 'The Exiles', desc: 'Sixty thousand Lithuanian refugees in Germany, and later in America, Canada and Australia, keep the nation\'s voice alive abroad.', mods: { awarenessGrowth: 0.05 } },
+            log: 'The Red Army returns; tens of thousands of Lithuanians flee west.' } },
+        { text: 'Stay, endure, and keep the language alive.',
+          effects: { suspicion: -8, unity: -2, states: { where: 'core', literacy: 1 } } }
+      ] },
+
+    { id: 'hd_victory_1945', title: 'Victory Day',
+      date: '1945-05-09', trigger: { exists: 'SOV', before: '1945-06-30' },
+      pic: 'cat_war',
+      desc: "Germany has capitulated. The last German troops on the Baltic, the army group shut in the Courland pocket, lay down their arms. Klaipėda, taken by the Red Army in January, is a ruin without its German population, most of whom fled or were driven out; the northern half of East Prussia will become a Soviet province around Königsberg, soon to be called Kaliningrad.\n\nIn Moscow there are fireworks. In Lithuania the war is not over: in the forests it has only begun.",
+      options: [
+        { text: 'The war in Europe is over.',
+          effects: { unity: 2, log: 'Germany capitulates: the war in Europe is over.' } }
+      ] },
+
+    // ================================================================ the Commonwealth in 1939
+    { id: 'hd_cw_german_1939', title: 'The German Invasion',
+      date: '1939-09-01', trigger: { phase: 'independent', form: 'commonwealth', exists: 'GER', before: '1939-10-01' },
+      major: true, pic: 'cat_war',
+      desc: "At dawn the German army crossed the borders of the Commonwealth from East Prussia, Pomerania, Silesia and Slovakia, and German bombers struck Warsaw, Vilnius and Kraków. Britain and France have promised help. The army of the Union, Polish and Lithuanian regiments together, must hold until it comes.",
+      options: [
+        { text: 'Mobilize the Union.',
+          effects: { flag: 'hd_cw_war', unity: 10,
+            war: { a: ['GER'], b: ['LIT'], name: 'German Invasion of the Commonwealth', goals: ['vilnius', 'kaunas'] },
+            units: [ { tag: 'GER', type: 'infantry', where: ['karaliaucius', 'isrutis', 'tilze', 'gumbine'], count: 12, name: 'German Army' },
+              { tag: 'GER', type: 'artillery', where: ['karaliaucius'], count: 3, name: 'German Artillery' } ],
+            log: 'Germany invades the Commonwealth.' } }
+      ] },
+
+    { id: 'hd_cw_soviet_1939', title: 'The Stab in the Back',
+      date: '1939-09-17', trigger: { phase: 'independent', form: 'commonwealth', flag: 'hd_cw_war', exists: 'SOV', before: '1939-10-15' },
+      major: true, pic: 'red_army',
+      desc: "The Red Army has crossed the eastern border of the Commonwealth 'to protect the Ukrainian and Belarusian population'. Its columns are marching on Vilnius, Lida and Lviv while the army of the Union is fighting the Germans in the west.",
+      options: [
+        { text: 'Fight on two fronts.',
+          effects: { unity: 5, war: { a: ['SOV'], b: ['LIT'], name: 'Soviet Invasion of the Commonwealth', goals: ['vilnius', 'gardinas', 'lyda'] },
+            units: [ { tag: 'SOV', type: 'infantry', where: ['minskas', 'gluboke', 'pastovys'], count: 10, name: 'Red Army' } ],
+            log: 'The Soviet Union invades the Commonwealth from the east.' } }
+      ] }
+  );
+})();
+
+</script>
+<script>
+window.VY = window.VY || {};
+VY.EVENTS = VY.EVENTS || [];
+/*
+ * events_e.js - historical events, part E: the Soviet years, 1946-01-01 to 1987-12-31 (ids he_...).
+ * The partisan war and the deportations, Stalin's death and the thaw, the long quiet resistance of the
+ * Church and the dissidents, to the first open rallies of 1987. Almost all of it happens to a Lithuania
+ * under Soviet rule (phase 'occupation', Kaunas owned by SOV); suspicion is the attention of the MGB/KGB.
+ *
+ * Contract flags SET here: he_lkks_1949 (the partisans' declaration of 16 February 1949), he_dissidents.
+ * Contract flags READ here: hd_partisan_war, uprising_active.
+ * Spirits: s_he_kolkhoz, s_he_samizdat.
+ */
+(function () {
+  'use strict';
+  const T = (base, extra) => Object.assign({}, base, extra);
+  // Soviet Lithuania
+  const SOVIET = { phase: 'occupation', ownerIs: { state: 'kaunas', tag: 'SOV' } };
+
+  VY.EVENTS.push(
+    { id: 'he_vesna_1948', title: 'Operation Spring',
+      date: '1948-05-22', trigger: T(SOVIET, { before: '1948-12-31' }),
+      major: true, pic: 'siberia',
+      desc: "On 22 and 23 May the MGB carried out the largest deportation Lithuania has known. Some forty thousand people, families of partisans and of men who fled west, farmers called kulaks, were taken from their homes at dawn, loaded into freight trains and sent to the Krasnoyarsk region, Buryatia and Irkutsk to cut timber in the taiga. More than a quarter of them are children.\n\nThe operation was called Vesna, Spring. Its purpose is to break the villages that feed the partisans, and to frighten the rest into the collective farms.",
+      options: [
+        { text: 'Warn the families on the next lists.',
+          effects: { suspicion: 12, unity: 6, states: { where: 'core', unrest: 8 }, log: 'Operation Vesna: some 40,000 people are deported from Lithuania to Siberia.' } },
+        { text: 'Send food and letters to the deportees.',
+          effects: { funds: -20, suspicion: 5, unity: 5 } }
+      ] },
+
+    { id: 'he_declaration_1949', title: 'The Declaration of 16 February',
+      date: '1949-02-16', trigger: T(SOVIET, { before: '1949-12-31' }),
+      pic: 'partisans',
+      desc: "In a bunker at the Minaičiai farmstead near Radviliškis, eight partisan commanders from every region of Lithuania have met for weeks and united their forces in the Union of Lithuanian Freedom Fighters. Today, on the anniversary of the Act of Independence, they sign a declaration: the Council of the Union is the highest political authority in occupied Lithuania until the country is free, and the restored state will be a democratic republic. Its chairman is Jonas Žemaitis, called Vytautas.\n\nThey have perhaps a few thousand fighters left, against the MGB, the army and the 'destroyer' battalions. They sign anyway, for the record.",
+      options: [
+        { text: 'The Council speaks for Lithuania.',
+          effects: { flag: 'he_lkks_1949', unity: 8, suspicion: 5, states: { where: 'core', awareness: 2 }, log: 'The partisan commanders proclaim the Declaration of the Union of Lithuanian Freedom Fighters.' } }
+      ] },
+
+    { id: 'he_priboi_1949', title: 'The Kolkhoz and the Trains',
+      date: '1949-03-25', trigger: T(SOVIET, { before: '1949-12-31' }),
+      major: true, pic: 'siberia',
+      desc: "In four days at the end of March, operation Priboi has deported some thirty thousand more people from Lithuania, and more than sixty thousand from Latvia and Estonia. Within weeks the villages that hesitated are joining the collective farms by the hundred: the private farm, which the land reform of 1922 made the heart of Lithuania, is being abolished.\n\nThe partisans have lost the farms that hid and fed them.",
+      options: [
+        { text: 'Hide those on the lists, whatever it costs.',
+          effects: { suspicion: 12, unity: 5, states: { where: 'core', unrest: 6 },
+            spirit: { id: 's_he_kolkhoz', name: 'The Kolkhoz', desc: 'Collective farms replace the family farm.', mods: { fundsMonthly: -4, unrestGrowth: 0.05 } },
+            log: 'Operation Priboi deports some 30,000 people from Lithuania; collectivization is forced through.' } },
+        { text: 'Bend: join the kolkhoz, keep the family together.',
+          effects: { suspicion: -6, unity: -4,
+            spirit: { id: 's_he_kolkhoz', name: 'The Kolkhoz', desc: 'Collective farms replace the family farm.', mods: { fundsMonthly: -4 } } } }
+      ] },
+
+    { id: 'he_stalin_1953', title: 'Stalin Is Dead',
+      date: '1953-03-05', trigger: { exists: 'SOV', before: '1953-12-31' },
+      pic: 'cat_politics',
+      desc: "Joseph Stalin has died in Moscow. Radio Vilnius plays mourning music for days, and schoolchildren are made to weep at his portrait. In the summer Lavrentiy Beria, before his own fall, orders that Lithuanians should run Lithuania and that the Russian language should yield to Lithuanian in the republic's offices.\n\nNo one knows yet whether this is a thaw or a pause. The camps of Vorkuta and Norilsk are full of Lithuanians, and they too have heard the news.",
+      options: [
+        { text: 'Wait, and watch.',
+          effects: { suspicion: -5, unity: 2, log: 'Stalin dies in Moscow.' } }
+      ] },
+
+    { id: 'he_zemaitis_1953', title: 'The Last Commander',
+      date: '1953-05-30', trigger: T(SOVIET, { before: '1953-12-31' }),
+      pic: 'partisans',
+      desc: "Jonas Žemaitis, chairman of the partisans' Union, partly paralysed by a stroke, has been betrayed and taken alive by the MGB in his bunker. He will be flown to Moscow, interrogated, and shot in Butyrka prison. The organized resistance is over; some twenty thousand partisans have died in nine years of war. Adolfas Ramanauskas, called Vanagas, and a few dozen men fight on in the forests of Dzūkija.\n\nThe forest brothers who remain come out, one by one, under amnesties that are often a trap.",
+      options: [
+        { text: 'Keep the names and the songs of the fallen.',
+          effects: { unity: 5, states: { where: 'core', awareness: 2 }, if: { cond: { flag: 'uprising_active' }, then: { endUprising: 'defeat' } },
+            log: 'Jonas Žemaitis is captured: the organized partisan war ends.' } }
+      ] },
+
+    { id: 'he_thaw_1956', title: 'Coming Home',
+      date: '1956-03-01', trigger: T(SOVIET, { before: '1956-12-31' }),
+      pic: 'train',
+      desc: "In Moscow Nikita Khrushchev has denounced Stalin's crimes to a closed session of the Party Congress, and the camps are opening. Deportees and political prisoners begin to come home from Siberia, Kazakhstan and the Arctic, thin, ill, often forbidden to settle in their own villages, where strangers live in their houses.\n\nThey bring back the songs of the camps and the names of those who stayed in the frozen ground.",
+      options: [
+        { text: 'Help them find work and a roof.',
+          effects: { funds: -20, unity: 6, states: { where: 'core', awareness: 2 }, log: 'The thaw: deportees and political prisoners begin to return to Lithuania.' } }
+      ] },
+
+    { id: 'he_kaunas_1956', title: 'All Souls\' Day in Kaunas',
+      date: '1956-11-02', trigger: T(SOVIET, { before: '1956-12-31' }),
+      pic: 'church',
+      desc: "In the cemetery on Vytauto prospektas in Kaunas, where the soldiers of the independence wars lie, thousands gathered on All Souls' Day with candles. Someone began to sing the old national anthem, then songs of the uprising in Hungary, which Soviet tanks crushed in Budapest two days ago. The crowd marched into the city chanting 'Freedom for Hungary' before the militia broke it up.\n\nIt is the first mass protest in Soviet Lithuania. The KGB will spend months finding its organizers.",
+      options: [
+        { text: 'Hide the students who led the march.',
+          effects: { suspicion: 10, unity: 6, log: 'All Souls\' Day 1956: a mass demonstration in Kaunas in solidarity with Hungary.' } },
+        { text: 'Let it pass quietly.',
+          effects: { suspicion: -3 } }
+      ] },
+
+    { id: 'he_chronicle_1972', title: 'The Chronicle',
+      date: '1972-03-19', trigger: T(SOVIET, { before: '1972-12-31' }),
+      pic: 'press',
+      desc: "A typewritten bulletin is passing from hand to hand: the Chronicle of the Catholic Church in Lithuania. It lists, with names, dates and places, the priests fined for teaching children the catechism, the believers fired from their jobs, the churches closed. Copies reach the West by secret routes and are read aloud on Radio Vatican and Radio Liberty.\n\nIts editors, among them the priest Sigitas Tamkevičius, risk years in the camps. The KGB will never manage to stop it.",
+      options: [
+        { text: 'Retype it, pass it on.',
+          effects: { suspicion: 8, states: { where: 'core', awareness: 3 },
+            spirit: { id: 's_he_samizdat', name: 'Samizdat', desc: 'Typewritten bulletins and books pass from hand to hand.', mods: { awarenessGrowth: 0.1, suspicionGain: 0.05 } },
+            log: 'The first issue of the Chronicle of the Catholic Church in Lithuania appears.' } }
+      ] },
+
+    { id: 'he_kalanta_1972', title: 'Romas Kalanta',
+      date: '1972-05-14', trigger: T(SOVIET, { before: '1972-12-31' }),
+      major: true, pic: 'kaunas_old',
+      desc: "In the garden in front of the Musical Theatre in Kaunas, where the People's Seimas voted for annexation in 1940, a nineteen-year-old student, Romas Kalanta, set himself on fire in protest against the occupation and died of his burns. On the day of his funeral, which the authorities held early and in secret, thousands of young people filled the streets of Kaunas, shouting for freedom for Lithuania.\n\nRiot troops cleared the streets after two days; hundreds were detained. The authorities declare Kalanta mentally ill. To his generation he is something else.",
+      options: [
+        { text: 'Keep the young people safe from the KGB.',
+          effects: { suspicion: 8, unity: 8, states: { where: 'core', awareness: 2 }, log: 'After the self-immolation of Romas Kalanta, mass protests break out in Kaunas.' } }
+      ] },
+
+    { id: 'he_helsinki_1976', title: 'The Helsinki Group',
+      date: '1976-11-25', trigger: T(SOVIET, { before: '1977-12-31' }),
+      pic: 'cat_conspiracy',
+      desc: "In the Helsinki Final Act the Soviet Union promised to respect human rights. Five people in Vilnius, Viktoras Petkus, the poet Tomas Venclova, Ona Lukauskaitė-Poškienė, the physicist Eitanas Finkelšteinas and the priest Karolis Garuckas, have announced a group to watch whether it keeps that promise in Lithuania, and to report to the world when it does not.\n\nWithin months Venclova will be forced into exile and Petkus sentenced to fifteen years.",
+      options: [
+        { text: 'Smuggle their reports to the West.',
+          effects: { flag: 'he_dissidents', suspicion: 8, pp: 20, log: 'The Lithuanian Helsinki Group is founded in Vilnius.' } }
+      ] },
+
+    { id: 'he_baltic_appeal_1979', title: 'The Baltic Appeal',
+      date: '1979-08-23', trigger: T(SOVIET, { before: '1979-12-31' }),
+      pic: 'diplomacy',
+      desc: "On the fortieth anniversary of the Molotov-Ribbentrop Pact, forty-five people from Lithuania, Latvia and Estonia have signed an appeal to the United Nations and to the governments of the Atlantic Charter: publish the secret protocols that divided Eastern Europe in 1939, declare them void, and end the consequences, the occupation of the Baltic states.\n\nIn four years the European Parliament will take up their demand.",
+      options: [
+        { text: 'Add our names.',
+          effects: { suspicion: 10, pp: 25, states: { where: 'core', awareness: 2 }, log: 'Forty-five Baltic dissidents sign the Baltic Appeal on the anniversary of the pact.' } },
+        { text: 'Spread the text, keep the names hidden.',
+          effects: { suspicion: 4, states: { where: 'core', awareness: 1 } } }
+      ] },
+
+    { id: 'he_zalgiris_1986', title: 'Žalgiris and CSKA',
+      date: '1986-04-15', trigger: T(SOVIET, { before: '1986-12-31' }),
+      pic: 'kaunas_old',
+      desc: "For the second year running, Žalgiris Kaunas, led by the giant centre Arvydas Sabonis, has beaten CSKA, the army club of Moscow, for the championship of the Soviet Union. In Kaunas they say no one goes to work the morning after a game against CSKA.\n\nOn the basketball court, a small nation can beat an empire, and every Lithuanian knows exactly what the score means.",
+      options: [
+        { text: 'Kaunas celebrates.',
+          effects: { unity: 6, log: 'Žalgiris Kaunas beats CSKA Moscow for the Soviet basketball championship.' } }
+      ] },
+
+    { id: 'he_chernobyl_1986', title: 'Chernobyl and Ignalina',
+      date: '1986-05-01', trigger: T(SOVIET, { before: '1986-12-31' }),
+      pic: 'cat_disaster',
+      desc: "A reactor has exploded at Chernobyl in Ukraine, and for days the Soviet press said almost nothing while the cloud drifted over Belarus and the Baltic. In eastern Lithuania, at Ignalina, stands a power station with the same kind of reactor, the largest in the world, built by Moscow on Lithuanian land with Russian-speaking workers.\n\nFor the first time people dare to ask, aloud, who decides what is built in Lithuania.",
+      options: [
+        { text: 'Gather the scientists who ask questions.',
+          effects: { suspicion: 4, states: { where: 'core', awareness: 2 }, log: 'The Chernobyl disaster; Lithuanians begin to question the Ignalina power plant.' } }
+      ] },
+
+    { id: 'he_mickiewicz_1987', title: 'The Rally at the Mickiewicz Monument',
+      date: '1987-08-23', trigger: T(SOVIET, { before: '1987-12-31' }),
+      pic: 'mickiewicz',
+      desc: "Gorbachev speaks of glasnost, and the Lithuanian Freedom League, a group of former political prisoners, has tested it. On the anniversary of the Molotov-Ribbentrop Pact, several hundred people gathered at the Mickiewicz monument in Vilnius and spoke openly, for the first time in forty years, of the secret protocols and the occupation. The militia watched and did not stop it.\n\nThe press calls them extremists. But they were not arrested.",
+      options: [
+        { text: 'Next year, more of us.',
+          effects: { unity: 8, suspicion: 4, states: { where: 'core', awareness: 3 }, log: 'The first open rally against the Molotov-Ribbentrop Pact is held in Vilnius.' } }
+      ] }
+  );
+})();
+
+</script>
+<script>
+window.VY = window.VY || {};
+VY.EVENTS = VY.EVENTS || [];
+/*
+ * events_f.js - historical events, part F: the Singing Revolution and the restored republic,
+ * 1988-01-01 to 2004-12-31 (ids hf_...). Sajudis, the Baltic Way, the Act of 11 March 1990 (the player
+ * becomes a state again: the Soviet-owned Lithuanian districts pass to it), the blockade, January 1991,
+ * recognition, the withdrawal of the Russian army, NATO and the European Union.
+ *
+ * Contract flags SET here: hf_restored (the Act of 11 March, or the declaration of August 1991),
+ *   hf_recognized, hf_nato, hf_eu.
+ * Private flags: hf_waited, hf_moratorium.
+ * Spirits: s_hf_blockade, s_hf_freedom, s_hf_transition.
+ */
+(function () {
+  'use strict';
+  const T = (base, extra) => Object.assign({}, base, extra);
+  const SOVIET = { phase: 'occupation', ownerIs: { state: 'kaunas', tag: 'SOV' } };
+  // the restored republic
+  const FREE = { phase: 'independent', flag: 'hf_restored' };
+  const RESTORE = { flag: 'hf_restored', transfer: { where: 'core', to: 'LIT', onlyOwnedBy: 'SOV' }, form: 'republic', removeSpirit: ['s_hd_soviet_rule', 's_he_kolkhoz'] };
+
+  VY.EVENTS.push(
+    // ================================================================ 1988-1989
+    { id: 'hf_sajudis_1988', title: 'Sąjūdis',
+      date: '1988-06-03', trigger: T(SOVIET, { before: '1988-12-31' }),
+      major: true, pic: 'cat_politics',
+      desc: "In the hall of the Academy of Sciences in Vilnius, thirty-five people, writers, scientists, philosophers, the musicologist Vytautas Landsbergis and the philosopher Arvydas Juozaitis among them, have formed an initiative group for a Lithuanian Movement for Perestroika: Sąjūdis. It promises to support Gorbachev's reforms. Everyone understands that it means much more.\n\nWithin weeks Sąjūdis groups are springing up in factories, institutes and villages across the republic.",
+      options: [
+        { text: 'Join Sąjūdis.',
+          effects: { unity: 10, suspicion: -10, states: { where: 'core', awareness: 3, network: 1 }, log: 'The Sąjūdis initiative group is founded in Vilnius.' } }
+      ] },
+
+    { id: 'hf_vingis_1988', title: 'Vingis Park',
+      date: '1988-08-23', trigger: T(SOVIET, { before: '1988-12-31' }),
+      pic: 'cat_city',
+      desc: "On the anniversary of the Molotov-Ribbentrop Pact, a quarter of a million people filled Vingis Park in Vilnius. Speakers read out the secret protocols, published in Lithuania for the first time, and the crowd raised the yellow, green and red tricolour that was banned for forty-eight years.\n\nA year ago a few hundred people gathered at the Mickiewicz monument. Now the whole country is singing.",
+      options: [
+        { text: 'Sing.',
+          effects: { unity: 10, states: { where: 'core', awareness: 3 }, log: 'A quarter of a million people rally in Vingis Park on the anniversary of the pact.' } }
+      ] },
+
+    { id: 'hf_congress_1988', title: 'The Founding Congress',
+      date: '1988-10-23', trigger: T(SOVIET, { before: '1989-06-01' }),
+      pic: 'cat_politics',
+      desc: "The tricolour has been raised over the Gediminas Tower. The Party has a new First Secretary, Algirdas Brazauskas, who promises to listen; the cathedral of Vilnius, a picture gallery for decades, is being returned to the Church. Today Sąjūdis holds its founding congress in the Sports Palace, broadcast live on television, and in November Vytautas Landsbergis becomes chairman of its council.\n\nThe Supreme Soviet in Moscow has not yet noticed how far the Lithuanians mean to go.",
+      options: [
+        { text: 'Lithuanian, the state language.',
+          effects: { unity: 6, pp: 20, states: { where: 'core', awareness: 2, assimilation: -2 }, log: 'Sąjūdis holds its founding congress; the tricolour flies over the Gediminas Tower.' } }
+      ] },
+
+    { id: 'hf_baltic_way_1989', title: 'The Baltic Way',
+      date: '1989-08-23', trigger: T(SOVIET, { before: '1989-12-31' }),
+      major: true, pic: 'cat_village',
+      desc: "At seven in the evening, some two million people joined hands along the roads from Vilnius through Riga to Tallinn: a human chain of 675 kilometres across three countries, fifty years to the day after the Molotov-Ribbentrop Pact. Cars and buses emptied every town; farmers came from the fields; in Lithuania alone a million people stood on the line for fifteen minutes.\n\nThe world's television shows a single image: three captive nations, hand in hand, asking to be free.",
+      options: [
+        { text: 'Hand in hand to Tallinn.',
+          effects: { unity: 15, opinion: { tag: 'LAT', add: 20 }, pp: 30, states: { where: 'core', awareness: 4 }, log: 'The Baltic Way: two million people form a chain from Vilnius to Tallinn.' } }
+      ] },
+
+    { id: 'hf_party_split_1989', title: 'The Party Leaves Moscow',
+      date: '1989-12-20', trigger: T(SOVIET, { before: '1990-03-10' }),
+      pic: 'cat_politics',
+      desc: "The congress of the Communist Party of Lithuania has voted to break away from the Communist Party of the Soviet Union, the first republican party ever to do so. In January Mikhail Gorbachev himself will walk the streets of Vilnius pleading with crowds to stay in the Union, and hear them answer with the word independence.\n\nIn February the republic elects a new Supreme Council. Sąjūdis expects to win it.",
+      options: [
+        { text: 'Toward the elections.',
+          effects: { unity: 5, pp: 20, log: 'The Communist Party of Lithuania breaks away from the CPSU.' } }
+      ] },
+
+    // ================================================================ 1990-1991
+    { id: 'hf_act_1990', title: 'The Act of 11 March',
+      date: '1990-03-11', trigger: T(SOVIET, { before: '1991-08-01' }),
+      major: true, pic: 'act_1918',
+      desc: "Sąjūdis has won the elections to the Supreme Council. Tonight, with 124 votes in favour and six abstentions, the Council has adopted the Act on the Re-Establishment of the State of Lithuania: the sovereign powers of the State of Lithuania, abolished by foreign force in 1940, are restored, and from now on Lithuania is again an independent state. Vytautas Landsbergis is elected Chairman of the Supreme Council.\n\nLithuania is the first republic of the Soviet Union to declare its independence. Gorbachev calls it illegal; Soviet troops remain in their barracks, and no foreign government has yet recognized it.",
+      options: [
+        { text: 'Lithuania is free.',
+          effects: Object.assign({}, RESTORE, { unity: 20, pp: 50,
+            spirit: { id: 's_hf_freedom', name: 'The Singing Revolution', desc: 'A nation that won its freedom by singing.', days: 3650, mods: { unityMonthly: 0.2, ppDaily: 0.2 } },
+            log: 'The Supreme Council restores the independent State of Lithuania.' }) },
+        { text: 'Wait for Moscow to agree to a timetable.',
+          effects: { flag: 'hf_waited', unity: -10, pp: 10 } }
+      ] },
+
+    { id: 'hf_blockade_1990', title: 'The Blockade',
+      date: '1990-04-18', trigger: T(FREE, { before: '1990-12-31' }),
+      pic: 'cat_industry',
+      desc: "Moscow has cut off oil and most of the natural gas to Lithuania. Factories close for lack of raw materials, petrol is rationed, and buses stop running in the provinces. Gorbachev demands that the Act of 11 March be revoked; Western governments urge Vilnius to compromise and send no help.\n\nThe Lithuanians ride bicycles, cut firewood and wait. How long can the country hold out?",
+      options: [
+        { text: 'Hold out: the Act stands.',
+          effects: { unity: 6, spirit: { id: 's_hf_blockade', name: 'The Blockade', desc: 'No Soviet oil or gas.', days: 75, mods: { fundsMonthly: -15 } }, log: 'The Soviet Union imposes an economic blockade on Lithuania.' } },
+        { text: 'Accept a moratorium on the Act, to end the blockade.',
+          effects: { flag: 'hf_moratorium', unity: -6, pp: 20, spirit: { id: 's_hf_blockade', name: 'The Blockade', desc: 'No Soviet oil or gas.', days: 30, mods: { fundsMonthly: -15 } },
+            log: 'Lithuania suspends its Act of independence for a hundred days; the blockade is lifted.' } }
+      ] },
+
+    { id: 'hf_january_1991', title: 'The Thirteenth of January',
+      date: '1991-01-13', trigger: T(FREE, { before: '1991-03-01' }),
+      major: true, pic: 'red_army',
+      desc: "In the night Soviet tanks and the Alpha special forces stormed the television tower and the radio and television building in Vilnius. Unarmed people stood around them in the snow; fourteen were killed, crushed by tanks or shot, and hundreds wounded. Thousands more ran to the Supreme Council and built barricades of concrete blocks, sand bags and tractors around it, ready to die there.\n\nThe tanks did not attack the parliament. The pictures from Vilnius are on every television screen in the world.",
+      options: [
+        { text: 'Defend the Supreme Council.',
+          effects: { unity: 15, pp: 30, log: 'Soviet troops storm the Vilnius TV tower: fourteen civilians are killed. Crowds defend the Supreme Council.' } }
+      ] },
+
+    { id: 'hf_plebiscite_1991', title: 'The Plebiscite',
+      date: '1991-02-09', trigger: T(FREE, { before: '1991-06-01' }),
+      pic: 'constitution',
+      desc: "Asked whether Lithuania should be an independent democratic republic, more than ninety per cent of those who voted have said yes. Two days later Iceland becomes the first country in the world to recognize the restored Lithuanian state.\n\nMoscow calls the vote meaningless. It has stopped saying so with tanks.",
+      options: [
+        { text: 'The nation has spoken.',
+          effects: { unity: 8, pp: 20, log: 'Over 90 per cent vote for independence; Iceland recognizes Lithuania.' } }
+      ] },
+
+    { id: 'hf_medininkai_1991', title: 'Medininkai',
+      date: '1991-07-31', trigger: T(FREE, { before: '1991-12-31' }),
+      pic: 'cat_repression',
+      desc: "At dawn, at the Medininkai border post on the road to Minsk, men of the Soviet OMON special police shot seven Lithuanian customs officers and policemen lying face down on the floor of their wagon. One young officer, Tomas Šernas, survived, crippled.\n\nThe border posts of the new state are a few wagons and a barrier across the road. Their guards had no chance.",
+      options: [
+        { text: 'Bury them as soldiers of the state.',
+          effects: { unity: 6, log: 'Seven Lithuanian border officers are murdered by the Soviet OMON at Medininkai.' } }
+      ] },
+
+    { id: 'hf_august_1991', title: 'The Coup Fails',
+      date: '1991-08-22', trigger: { exists: 'SOV', any: [{ flag: 'hf_restored' }, { all: [{ phase: 'occupation' }, { ownerIs: { state: 'kaunas', tag: 'SOV' } }] }], before: '1991-12-31' },
+      major: true, pic: 'cat_politics',
+      desc: "On 19 August hardliners in Moscow put Gorbachev under house arrest and declared a state of emergency; Soviet tanks rolled through Vilnius again and seized the radio and the television. Three days later the coup has collapsed: crowds led by Boris Yeltsin stood on the barricades in Moscow, and the soldiers would not fire. The Soviet troops are leaving the buildings they occupied.\n\nNow the recognitions come in a flood: Denmark, Norway, the European Community, the United States. On 6 September even the Soviet Union recognizes Lithuania's independence, and on 17 September it joins the United Nations.",
+      options: [
+        { text: 'Lithuania is recognized.',
+          effects: { flag: 'hf_recognized', unity: 10, pp: 40, if: { cond: { phase: 'occupation' }, then: Object.assign({}, RESTORE, { log: 'After the failed coup in Moscow, Lithuania declares its independence and is recognized.' }),
+            else: { log: 'The coup in Moscow fails; the world, and then the Soviet Union, recognize Lithuania.' } } } }
+      ] },
+
+    { id: 'hf_ussr_end_1991', title: 'The End of the Soviet Union',
+      date: '1991-12-26', trigger: T(FREE, { before: '1992-06-01' }),
+      pic: 'russian_revolution',
+      desc: "Mikhail Gorbachev has resigned, and the red flag has come down over the Kremlin. The Soviet Union has ceased to exist; Russia, Belarus, Ukraine and the other republics are independent states. Russia inherits the Soviet army, including the tens of thousands of troops still stationed in Lithuania, and the Kaliningrad region on its border.\n\nThe empire that occupied Lithuania for half a century is gone. Its soldiers are not.",
+      options: [
+        { text: 'Demand the withdrawal of the army.',
+          effects: { pp: 20, log: 'The Soviet Union is dissolved.' } }
+      ] },
+
+    // an alternate history: a Lithuanian state that outlived the Soviet Union takes back what it held
+    { id: 'hf_alt_soviet_end_1991', title: 'The Empire Withdraws',
+      date: '1991-12-20', trigger: { phase: 'independent', notFlag: 'hf_restored', exists: 'SOV', before: '1992-06-01',
+        any: ['vilnius', 'kaunas', 'klaipeda', 'siauliai', 'panevezys', 'alytus', 'marijampole', 'utena', 'telsiai', 'taurage', 'trakai', 'svencionys', 'eisiskes', 'salcininkai'].map(s => ({ ownerIs: { state: s, tag: 'SOV' } })) },
+      major: true, pic: 'russian_revolution',
+      desc: "The Soviet Union is breaking apart: the republics are leaving one by one, and in a few days the red flag will come down over the Kremlin. The garrisons in the Lithuanian lands the Soviets held are packing up, and their commanders ask only for safe passage home.\n\nWhat the empire took from us, it can no longer keep.",
+      options: [
+        { text: 'Take back our districts.',
+          effects: { transfer: { where: 'core', to: 'LIT', onlyOwnedBy: 'SOV' }, unity: 10, log: 'As the Soviet Union dissolves, its garrisons leave the Lithuanian districts.' } }
+      ] },
+
+    // ================================================================ 1992-2004
+    { id: 'hf_constitution_1992', title: 'The Constitution of 1992',
+      date: '1992-10-25', trigger: T(FREE, { before: '1993-06-01' }),
+      pic: 'constitution',
+      desc: "In a referendum the voters have approved a new constitution: a parliamentary republic with a Seimas of 141 members and a President elected by the people. On the same day the first elections to the Seimas are won, to the surprise of many, by the Democratic Labour Party, the former communists of Algirdas Brazauskas, as the hardships of the transition turn voters against Sąjūdis.\n\nPower changes hands by the ballot, peacefully. That, too, is a kind of independence.",
+      options: [
+        { text: 'A parliamentary republic.',
+          effects: { pp: 30, unity: 4, removeSpirit: 's_hc_nationalists', log: 'Lithuania adopts its constitution; the Democratic Labour Party wins the Seimas elections.',
+            spirit: { id: 's_hf_transition', name: 'The Transition', desc: 'Privatization, inflation and new freedoms.', days: 2555, mods: { fundsMonthly: -4, ppDaily: 0.1 } } } }
+      ] },
+
+    { id: 'hf_litas_1993', title: 'The Litas Returns',
+      date: '1993-06-25', trigger: T(FREE, { before: '1994-01-01' }),
+      pic: 'litas',
+      desc: "The temporary coupons that replaced the rouble are being withdrawn, and the litas, the currency of 1922, is back in Lithuanian pockets. Inflation, which reached more than a thousand per cent last year, begins to fall. Next spring the litas will be pegged to the dollar at four to one by a currency board.",
+      options: [
+        { text: 'A sound currency again.',
+          effects: { funds: 60, log: 'The litas is reintroduced.', spirit: { id: 's_hb_litas', name: 'The Litas', desc: 'A stable national currency, again.', mods: { fundsMonthly: 6 } } } }
+      ] },
+
+    { id: 'hf_troops_out_1993', title: 'The Last Train',
+      date: '1993-08-31', trigger: T(FREE, { before: '1994-01-01' }),
+      major: true, pic: 'train',
+      desc: "The last Russian soldiers have left Lithuania, the first of the three Baltic states to see them go, a year before Latvia and Estonia. Fifty-three years after the Red Army entered the country, there is no foreign army on Lithuanian soil.\n\nA few days later Pope John Paul II arrives for a visit of five days, saying Mass at Vilnius cathedral and on the Hill of Crosses near Šiauliai.",
+      options: [
+        { text: 'Free of foreign troops.',
+          effects: { unity: 12, pp: 30, removeUnits: { tag: 'SOV', fraction: 1, where: 'core' }, log: 'The last Russian troops leave Lithuania.' } }
+      ] },
+
+    { id: 'hf_banks_1995', title: 'The Bank Crisis',
+      date: '1995-12-21', trigger: T(FREE, { before: '1996-06-01' }),
+      pic: 'market',
+      desc: "The Bank of Lithuania has suspended the two largest commercial banks, Innovation Bank and Litimpex. Thousands of depositors queue in vain for their savings, and it emerges that the Prime Minister withdrew his own deposit days before the suspension. He will be removed from office in February.",
+      options: [
+        { text: 'Guarantee the small depositors.',
+          effects: { funds: -50, unity: 3, log: 'The largest commercial banks collapse in the bank crisis of 1995.' } },
+        { text: 'Let the banks fail.',
+          effects: { unity: -5 } }
+      ] },
+
+    { id: 'hf_adamkus_1998', title: 'President Adamkus',
+      date: '1998-01-04', trigger: T(FREE, { before: '1998-06-01' }),
+      pic: 'cat_politics',
+      desc: "Valdas Adamkus, who fled with his family in 1944, fought for Lithuania in exile and became a senior official of the American Environmental Protection Agency in Chicago, has been elected President by the narrowest of margins. He renounces his American citizenship to take office.\n\nThe man who left as a refugee comes back to lead the country.",
+      options: [
+        { text: 'Westward.',
+          effects: { pp: 20, opinion: { tag: 'GBR', add: 5 }, log: 'Valdas Adamkus is elected President of Lithuania.' } }
+      ] },
+
+    { id: 'hf_russian_crisis_1998', title: 'The Russian Crisis',
+      date: '1998-08-17', trigger: T(FREE, { before: '1999-06-01' }),
+      pic: 'market',
+      desc: "Russia has defaulted on its debts and the rouble has collapsed. Lithuanian exporters, who still sell much of their food and goods to Russia, lose their markets overnight. The economy shrinks in 1999 and unemployment climbs.\n\nThe lesson is drawn quickly: the future of Lithuanian trade lies west.",
+      options: [
+        { text: 'Turn to Western markets.',
+          effects: { funds: -40, log: 'The Russian financial crisis hits Lithuanian exports.',
+            spirit: { id: 's_hf_russian_crisis', name: 'The Russian Crisis', desc: 'Lost markets in the east.', days: 730, mods: { fundsMonthly: -5 } } } }
+      ] },
+
+    { id: 'hf_nato_2004', title: 'NATO',
+      date: '2004-03-29', trigger: T(FREE, { before: '2004-12-31' }),
+      major: true, pic: 'cat_army',
+      desc: "In Washington, Lithuania, Latvia, Estonia, Slovenia, Slovakia, Bulgaria and Romania have joined the North Atlantic Treaty Organization. For the first time in its history Lithuania has allies who are bound to defend it: an attack on Vilnius is an attack on Washington, London and Berlin.\n\nWithin days NATO fighter jets begin to patrol the Baltic skies from Šiauliai, since the three states have no air forces of their own.",
+      options: [
+        { text: 'Never alone again.',
+          effects: { flag: 'hf_nato', unity: 10, pp: 40, opinion: { tag: 'GBR', add: 20 }, log: 'Lithuania joins NATO.',
+            spirit: { id: 's_hf_nato', name: 'NATO', desc: 'An attack on one is an attack on all.', mods: { unitDefense: 0.15, unitOrg: 0.1 } } } }
+      ] },
+
+    { id: 'hf_paksas_2004', title: 'The Impeachment',
+      date: '2004-04-06', trigger: T(FREE, { before: '2004-12-31' }),
+      pic: 'constitution',
+      desc: "The Seimas has removed President Rolandas Paksas from office, the first European head of state ever to be impeached. The Constitutional Court found that he broke his oath, among other things by granting citizenship to a Russian businessman who had financed his campaign.\n\nThe young democracy has used the hardest tool its constitution gives it, and survived. In June Valdas Adamkus is elected President again.",
+      options: [
+        { text: 'The constitution works.',
+          effects: { pp: 10, unity: 2, log: 'President Rolandas Paksas is impeached and removed from office.' } }
+      ] },
+
+    { id: 'hf_eu_2004', title: 'Europe',
+      date: '2004-05-01', trigger: T(FREE, { before: '2004-12-31' }),
+      major: true, pic: 'diplomacy',
+      desc: "At midnight Lithuania joined the European Union, together with Latvia, Estonia, Poland and six other states. In the referendum last year more than ninety per cent of voters said yes. Lithuanian farmers will receive European subsidies, Lithuanian workers will soon be free to work in Dublin and London, and European funds will rebuild roads, schools and town squares.\n\nFifteen years after the Baltic Way, the country is back in Europe, by its own choice.",
+      options: [
+        { text: 'Back in Europe.',
+          effects: { flag: 'hf_eu', unity: 10, funds: 100, log: 'Lithuania joins the European Union.',
+            spirit: { id: 's_hf_eu', name: 'The European Union', desc: 'Open markets, structural funds, and the freedom to move.', mods: { fundsMonthly: 12, manpowerFactor: -0.05 } } } }
+      ] }
+  );
+})();
+
+</script>
+<script>
+window.VY = window.VY || {};
+VY.EVENTS = VY.EVENTS || [];
+/*
+ * events_g.js - historical events, part G: Lithuania in the European Union and NATO, 2005-01-01 to
+ * 2025-12-31 (ids hg_...). Schengen, the crash of 2009, energy independence, the euro, Russia's wars
+ * against Ukraine, the crises on the Belarusian border, the NATO summit in Vilnius, the German brigade.
+ * Only what was publicly known by the end of 2025; the game's chronicle ends there.
+ *
+ * Contract flags READ here: hf_restored (the historical republic).
+ * Spirits: s_hg_schengen, s_hg_crash, s_hg_lng, s_hg_euro, s_hg_conscription, s_hg_war_ukraine, s_hg_brigade.
+ */
+(function () {
+  'use strict';
+  const T = (base, extra) => Object.assign({}, base, extra);
+  const FREE = { phase: 'independent', flag: 'hf_restored' };
+
+  VY.EVENTS.push(
+    { id: 'hg_schengen_2007', title: 'No More Borders',
+      date: '2007-12-21', trigger: T(FREE, { before: '2008-06-01' }),
+      pic: 'cat_city',
+      desc: "At midnight the border posts between Lithuania and Poland, and between Lithuania and Latvia, stopped checking passports: Lithuania has joined the Schengen area. On the old road from Kaunas to Suwałki, where in the 1920s and 1930s no train crossed and no letter passed, cars now drive through without stopping.\n\nThe frontier of the Schengen area runs instead along the borders with Belarus and the Kaliningrad region, and Lithuania must guard it for all of Europe.",
+      options: [
+        { text: 'Open to Europe, closed to the east.',
+          effects: { unity: 3, funds: 20, log: 'Lithuania joins the Schengen area.',
+            spirit: { id: 's_hg_schengen', name: 'Schengen', desc: 'Open borders with the west, a guarded frontier to the east.', mods: { fundsMonthly: 3 } } } }
+      ] },
+
+    { id: 'hg_crash_2009', title: 'The Crash',
+      date: '2009-01-16', trigger: T(FREE, { before: '2009-12-31' }),
+      pic: 'market',
+      desc: "The boom of the first years in the Union, built on cheap Scandinavian credit, has ended in a crash. The economy will shrink by some fifteen per cent this year; the government of Andrius Kubilius is cutting wages and pensions to keep the litas pegged to the euro. Today a protest outside the Seimas turned into a riot, with stones thrown through its windows.\n\nTens of thousands of young people are packing their bags for Ireland, Britain and Norway.",
+      options: [
+        { text: 'Cut, and keep the peg.',
+          effects: { unity: -5, funds: -50, log: 'The economic crisis: riots outside the Seimas in Vilnius.',
+            spirit: { id: 's_hg_crash', name: 'The Crash', desc: 'Austerity and emigration.', days: 1095, mods: { fundsMonthly: -8, manpowerFactor: -0.05 } } } }
+      ] },
+
+    { id: 'hg_millennium_2009', title: 'A Thousand Years of the Name',
+      date: '2009-07-06', trigger: T(FREE, { before: '2009-12-31' }),
+      pic: 'vilnius_old',
+      desc: "A thousand years ago the annals of Quedlinburg recorded that the missionary Bruno was killed 'on the border of Rus and Lithuania': the first time the country's name was written down. Lithuania celebrates the millennium on the Day of Statehood, the rebuilt Palace of the Grand Dukes rises again behind Vilnius cathedral, and Lithuanians around the world sing the anthem together at the same moment.\n\nA week later Dalia Grybauskaitė, a former European Commissioner, takes office as the first woman President of Lithuania.",
+      options: [
+        { text: 'Sing the anthem together.',
+          effects: { unity: 6, log: 'Lithuania celebrates the millennium of its name; Dalia Grybauskaitė becomes President.' } }
+      ] },
+
+    { id: 'hg_ignalina_2009', title: 'Ignalina Closes',
+      date: '2009-12-31', trigger: T(FREE, { before: '2010-06-01' }),
+      pic: 'cat_industry',
+      desc: "As promised when it joined the European Union, Lithuania has shut down the second reactor of the Ignalina nuclear power plant, the same kind of reactor as at Chernobyl. Overnight the country goes from selling electricity to buying most of it, much of it from Russia and Belarus.\n\nEnergy, for years to come, will be a question of independence.",
+      options: [
+        { text: 'Build the links to the west.',
+          effects: { funds: -40, log: 'The Ignalina nuclear power plant is closed.' } }
+      ] },
+
+    { id: 'hg_crimea_2014', title: 'Crimea',
+      date: '2014-03-18', trigger: T(FREE, { before: '2014-12-31' }),
+      major: true, pic: 'cat_war',
+      desc: "Russian soldiers without insignia seized the Crimean peninsula in February; after a referendum held under their guns, Russia has today annexed it. In eastern Ukraine, Russian-backed forces are taking over towns in the Donbas, and a war is beginning there.\n\nIn Vilnius the President speaks plainly: if Russia is not stopped in Ukraine, it will not stop. Lithuania asks NATO for allied troops on its soil and begins to rearm.",
+      options: [
+        { text: 'Stand with Ukraine, and rearm.',
+          effects: { unity: 8, funds: -40, log: 'Russia annexes Crimea; Lithuania asks NATO for allied troops.' } }
+      ] },
+
+    { id: 'hg_lng_2014', title: 'Independence',
+      date: '2014-10-27', trigger: T(FREE, { before: '2015-06-01' }),
+      pic: 'ship',
+      desc: "A floating liquefied gas terminal, named Independence, has moored in the port of Klaipėda. For the first time Lithuania can buy natural gas from someone other than Gazprom, and Gazprom, at once, lowers its price.\n\nIn the port where Lithuania lost its access to the sea in 1939, it has won its energy independence.",
+      options: [
+        { text: 'Gas from the sea.',
+          effects: { funds: 40, log: 'The LNG terminal Independence arrives in Klaipėda.',
+            spirit: { id: 's_hg_lng', name: 'Energy Independence', desc: 'Gas by sea, power links to Sweden and Poland.', mods: { fundsMonthly: 4 } } } }
+      ] },
+
+    { id: 'hg_euro_2015', title: 'The Euro',
+      date: '2015-01-01', trigger: T(FREE, { before: '2015-06-01' }),
+      pic: 'litas',
+      desc: "Lithuania has adopted the euro, the last of the three Baltic states to do so. The litas, born in 1922, abolished in 1941 and restored in 1993, is withdrawn for the second time, and this time no one has taken it away. On the Lithuanian euro coins is the Vytis.",
+      options: [
+        { text: 'Farewell to the litas.',
+          effects: { removeSpirit: 's_hb_litas', log: 'Lithuania adopts the euro.',
+            spirit: { id: 's_hg_euro', name: 'The Euro', desc: 'A member of the eurozone.', mods: { fundsMonthly: 8 } } } }
+      ] },
+
+    { id: 'hg_conscription_2015', title: 'Conscription Returns',
+      date: '2015-03-19', trigger: T(FREE, { before: '2015-12-31' }),
+      pic: 'cat_army',
+      desc: "Seven years after it was abolished, the Seimas has restored compulsory military service: several thousand young men a year will serve nine months in the army. Volunteers come forward in such numbers that few need to be drafted. The Riflemen's Union, founded in 1919 and revived in 1989, is growing again.",
+      options: [
+        { text: 'A nation in arms.',
+          effects: { manpower: 3000, unity: 4, units: { tag: 'LIT', type: 'infantry', where: ['kaunas', 'vilnius'], count: 2, name: 'Mechanized Infantry Brigade' },
+            spirit: { id: 's_hg_conscription', name: 'Conscription', desc: 'Every young man may be called to serve.', mods: { manpowerFactor: 0.1, unitOrg: 0.05 } },
+            log: 'Lithuania restores conscription.' } }
+      ] },
+
+    { id: 'hg_battlegroup_2017', title: 'Allies in Rukla',
+      date: '2017-02-07', trigger: T(FREE, { flag: 'hf_nato', before: '2017-12-31' }),
+      pic: 'cat_army',
+      desc: "A NATO battlegroup led by Germany, with soldiers from the Netherlands, Belgium, Norway and other allies, has arrived at Rukla. Similar battlegroups are deploying in Latvia, Estonia and Poland. They are not enough to stop an invasion; they are there to make sure that an attack on Lithuania would be an attack on all of them.",
+      options: [
+        { text: 'Welcome, allies.',
+          effects: { unity: 4, opinion: { tag: 'GER', add: 15 }, log: 'A German-led NATO battlegroup deploys to Lithuania.' } }
+      ] },
+
+    { id: 'hg_belarus_2020', title: 'Belarus Rises',
+      date: '2020-08-10', trigger: T(FREE, { before: '2020-12-31' }),
+      pic: 'cat_uprising',
+      desc: "Alexander Lukashenko has claimed victory in a presidential election that almost no one believes. Hundreds of thousands of Belarusians fill the streets of Minsk under the white, red and white flag, and the police answer with beatings and mass arrests. His rival Sviatlana Tsikhanouskaya has been forced out of the country and has found refuge in Vilnius.\n\nOn 23 August Lithuanians form a human chain from Vilnius to the Belarusian border, as their parents did in 1989.",
+      options: [
+        { text: 'Shelter the Belarusian opposition.',
+          effects: { unity: 4, opinion: { tag: 'BLR', add: -25 }, log: 'Mass protests in Belarus; Sviatlana Tsikhanouskaya takes refuge in Vilnius.' } }
+      ] },
+
+    { id: 'hg_migrants_2021', title: 'The Border Crisis',
+      date: '2021-07-02', trigger: T(FREE, { before: '2021-12-31' }),
+      pic: 'forest',
+      desc: "Thousands of migrants, flown to Minsk from Iraq and elsewhere with the help of the Belarusian regime, are being pushed across the forests and marshes of the Lithuanian border, more in a few weeks than in many years before. Lukashenko is taking revenge for Lithuania's support of the Belarusian opposition.\n\nThe government declares an emergency, turns people back at the border and begins building a fence along its whole length.",
+      options: [
+        { text: 'Close the border and build the fence.',
+          effects: { funds: -60, unity: 3, log: 'The Belarusian regime pushes migrants across the Lithuanian border; Lithuania builds a fence.' } },
+        { text: 'Guard the border, and give asylum seekers a fair hearing.',
+          effects: { funds: -40, pp: -10, unity: -2 } }
+      ] },
+
+    { id: 'hg_taiwan_2021', title: 'The Taiwanese Office',
+      date: '2021-11-18', trigger: T(FREE, { before: '2022-06-01' }),
+      pic: 'diplomacy',
+      desc: "A Taiwanese Representative Office has opened in Vilnius, the first in Europe to carry Taiwan's own name. Beijing has recalled its ambassador, downgraded relations, and is blocking Lithuanian goods, and goods with Lithuanian parts, at Chinese customs.\n\nA country of under three million has picked a quarrel with one of 1.4 billion, and many in Vilnius ask whether it was worth it.",
+      options: [
+        { text: 'Values over trade.',
+          effects: { funds: -40, pp: 15, log: 'A Taiwanese Representative Office opens in Vilnius; China imposes a trade boycott.' } }
+      ] },
+
+    { id: 'hg_ukraine_2022', title: 'The Invasion of Ukraine',
+      date: '2022-02-24', trigger: T(FREE, { before: '2022-12-31' }),
+      major: true, pic: 'cat_war',
+      desc: "Before dawn Russia launched a full-scale invasion of Ukraine, with missiles on every major city and columns driving on Kyiv from Belarus. Lithuania declares a state of emergency. Ukrainian flags hang from balconies across the country, Lithuanians raise millions of euros for Ukraine's army, and tens of thousands of refugees arrive.\n\nWithin weeks Lithuania becomes the first country in the European Union to stop importing Russian gas entirely. Ukraine holds Kyiv. The war in the east goes on.",
+      options: [
+        { text: 'Everything for Ukraine.',
+          effects: { unity: 12, funds: -60, opinion: { tag: 'UKR', add: 40 }, log: 'Russia invades Ukraine. Lithuania declares a state of emergency and stops importing Russian gas.',
+            spirit: { id: 's_hg_war_ukraine', name: 'War Next Door', desc: 'Defence spending rises, the Riflemen recruit, and every family knows what is at stake.', mods: { unityMonthly: 0.15, unitOrg: 0.05, fundsMonthly: -4 } } } }
+      ] },
+
+    { id: 'hg_kaliningrad_2022', title: 'The Kaliningrad Transit',
+      date: '2022-06-18', trigger: T(FREE, { before: '2022-12-31' }),
+      pic: 'train',
+      desc: "Applying the European Union's sanctions, Lithuania has stopped sanctioned goods, steel and building materials among them, from crossing its territory by rail between Russia and the Kaliningrad region. Moscow threatens 'serious' retaliation. After weeks of tension, Brussels issues guidance that lets the rail freight pass again.",
+      options: [
+        { text: 'Apply the sanctions as written.',
+          effects: { pp: 10, log: 'Lithuania halts sanctioned rail freight to Kaliningrad.' } }
+      ] },
+
+    { id: 'hg_vilnius_summit_2023', title: 'The Vilnius Summit',
+      date: '2023-07-11', trigger: T(FREE, { flag: 'hf_nato', before: '2023-12-31' }),
+      pic: 'diplomacy',
+      desc: "The leaders of NATO have met in Vilnius, guarded by air defences lent by the allies. Turkey has dropped its veto on Sweden's membership; the allies approve new defence plans for the eastern flank and promise Ukraine that its future lies in NATO, without saying when.\n\nGermany has promised to station a whole brigade in Lithuania, nearly five thousand soldiers, the first permanent German deployment abroad since the war.",
+      options: [
+        { text: 'Host the alliance.',
+          effects: { pp: 30, unity: 4, log: 'NATO holds its summit in Vilnius.' } }
+      ] },
+
+    { id: 'hg_elections_2024', title: 'The Elections of 2024',
+      date: '2024-10-27', trigger: T(FREE, { before: '2025-03-01' }),
+      pic: 'cat_politics',
+      desc: "In May President Gitanas Nausėda was re-elected for a second term. Now the Social Democrats have won the Seimas elections, and Gintautas Paluckas forms a coalition government, controversially including the new populist party Dawn of the Nemunas.\n\nWhoever governs, all the parties agree on one thing: defence spending must rise toward five per cent of the national income.",
+      options: [
+        { text: 'A new government.',
+          effects: { pp: 15, log: 'The Social Democrats win the Seimas elections.' } }
+      ] },
+
+    { id: 'hg_grid_2025', title: 'Off the Russian Grid',
+      date: '2025-02-09', trigger: T(FREE, { before: '2025-12-31' }),
+      major: true, pic: 'cat_industry',
+      desc: "This weekend Lithuania, Latvia and Estonia disconnected their power grids from the system they had shared with Russia and Belarus since Soviet times, and joined the European grid through Poland. Crowds gathered in Vilnius to watch the last lines to Belarus being cut.\n\nThe last physical link of the Soviet empire has been severed.",
+      options: [
+        { text: 'Synchronized with Europe.',
+          effects: { unity: 6, log: 'The Baltic states leave the Russian power grid and join the European one.' } }
+      ] },
+
+    { id: 'hg_brigade_2025', title: 'The German Brigade',
+      date: '2025-04-01', trigger: T(FREE, { flag: 'hf_nato', before: '2025-12-31' }),
+      pic: 'german_army',
+      desc: "The German Army's 45th Panzer Brigade, 'Lithuania', has been formally raised in Vilnius. When it is complete, nearly five thousand German soldiers and their families will live in Lithuania permanently, with tanks at Rūdninkai, near the Belarusian border.\n\nThe grandparents of today's Lithuanians saw German soldiers arrive as occupiers. These come because Lithuania asked them to.",
+      options: [
+        { text: 'Welcome the brigade.',
+          effects: { opinion: { tag: 'GER', add: 20 },
+            spirit: { id: 's_hg_brigade', name: 'Allied Brigade', desc: 'A German armoured brigade is stationed in Lithuania.', mods: { unitDefense: 0.1 } },
+            log: 'The German 45th Panzer Brigade is established in Lithuania.' } }
+      ] }
+  );
+})();
+
+</script>
+<script>
 // events_random.js - Random flavor events of the occupation era (1800-1918). Ids: rf_...
 // Mean-time-to-happen events (`mtth`, no date). Conditions use phase/after/before and these contract flags:
 //   press_ban (1864-1904 press ban, set by part B), serfdom_abolished, muravyov, uprising_lost.
@@ -13619,7 +14554,9 @@ window.VY = window.VY || {};
     { id: 'b1863', date: '1863-01-21', title: 'The January Rising', desc: 'The Reds and the Whites argue in secret rooms while conscription lists are drawn up. Tomorrow the forests fill with insurgents.' },
     { id: 'b1904', date: '1904-05-06', title: 'The Press Ban Lifted', desc: 'Forty years of the ban are ending. The book smugglers have won, the newspapers are coming home, and Russia is losing a war in the Far East.' },
     { id: 'b1918', date: '1918-02-15', title: 'The Act of Independence', desc: 'German soldiers hold every town. In a room on Didžioji Street twenty men prepare to sign a declaration.' },
-    { id: 'b1926', date: '1926-05-01', title: 'The Temporary Capital', desc: 'Kaunas, 1926. Vilnius lies behind a closed line, Klaipėda has been Lithuanian for three years, and the Seimas elections are a week away. In the officers\' clubs some men already talk of a firmer hand.' }
+    { id: 'b1926', date: '1926-05-01', title: 'The Temporary Capital', desc: 'Kaunas, 1926. Vilnius lies behind a closed line, Klaipėda has been Lithuanian for three years, and the Seimas elections are a week away. In the officers\' clubs some men already talk of a firmer hand.' },
+    { id: 'b1940', date: '1940-06-01', title: 'The Last Summer', desc: 'Vilnius is Lithuanian again, Soviet garrisons sit at their bases, and Paris is about to fall. In two weeks Molotov will hand over an ultimatum.' },
+    { id: 'b1988', date: '1988-05-20', title: 'The Singing Revolution', desc: 'Soviet Lithuania, 1988. Gorbachev speaks of openness, the Mickiewicz rally went unpunished, and in the Academy of Sciences thirty-five people are about to found a movement.' }
   ];
 
   Game.unitTypes = {
@@ -16091,7 +17028,8 @@ window.VY = window.VY || {};
     // the Great War elsewhere on the map (js/data/world.js): who holds which state
     for (const o of VY.WORLD_OCC || []) {
       const ks = new Set();
-      for (const [lat, lon] of o.at) { const uv = VY.MAP.lonLatToUV(lat, lon), k = VY.MAP.stateAtUV(uv[0], uv[1]); if (k >= 0 && !VY.STATE_DEFS[k].focus) ks.add(k); }
+      // (the story's own districts only when an entry says so: the German occupation of 1941-1944)
+      for (const [lat, lon] of o.at) { const uv = VY.MAP.lonLatToUV(lat, lon), k = VY.MAP.stateAtUV(uv[0], uv[1]); if (k >= 0 && (o.story || !VY.STATE_DEFS[k].focus)) ks.add(k); }
       for (const k of ks) WTL.push({ day: U.dayOf(o.date), k, occ: o.holder, owner: o.owner });
     }
     for (const t in VY.COUNTRY_DEFS) {
@@ -16099,6 +17037,11 @@ window.VY = window.VY || {};
       let prev = c.name;
       for (const [date, name, short, flag] of c.eras || []) { WTL.push({ day: U.dayOf(date), rename: t, prev, name, short, flag }); prev = name; }
     }
+    // the end of the Soviet Union: whatever it still holds that no timeline hands on (land it took in an
+    // alternate history) passes to Russia
+    WTL.push({ day: U.dayOf('1991-12-26'), sovEnd: true });
+    // German reunification: any land still filed under the Reich or the GDR belongs to the Federal Republic
+    WTL.push({ day: U.dayOf('1990-10-03'), gerEnd: true });
     WTL.sort((a, b) => a.day - b.day);
     return WTL;
   }
@@ -16107,6 +17050,14 @@ window.VY = window.VY || {};
     if (G.wtl === undefined) G.wtl = 0;
     while (G.wtl < L.length && L[G.wtl].day <= G.day) {
       const e = L[G.wtl++];
+      if (e.sovEnd || e.gerEnd) {
+        const from = e.sovEnd ? ['SOV'] : ['GER', 'GDR'], to = e.sovEnd ? 'RUF' : 'FRG';
+        G.states.forEach((s, k) => {
+          if (from.includes(s.owner)) Game.setOwner(k, to, from.includes(s.ctrl));
+          if (from.includes(s.ctrl)) Game.setController(k, to);
+        });
+        continue;
+      }
       if (e.rename) {
         const c = G.countries[e.rename];
         if (c && c.name === e.prev) { c.name = e.name; c.short = e.short; if (e.flag) c.flag = e.flag; }
@@ -16124,9 +17075,11 @@ window.VY = window.VY || {};
         continue;
       }
       const s = G.states[e.k];
-      if (LINE(s.owner) !== LINE(e.from)) continue;
-      // the player's own land is never moved by history alone, nor handed to the player: the story's events do that
-      if (e.from === G.player || e.to === G.player || s.owner === G.player) continue;
+      // the player's own land is never moved by history alone, nor handed to the player: the story's events do that.
+      // A district history takes from Lithuania that Lithuania does not hold (Vilnius in 1940 for a Lithuania that
+      // never got it back in 1939, Kaunas lost in some war of its own) goes on with history from its present holder.
+      if (e.to === G.player || s.owner === G.player) continue;
+      if (e.from !== G.player && LINE(s.owner) !== LINE(e.from)) continue;
       let to = e.to;
       // a nation united with ours (the Commonwealth, Aistija) gains its land through us
       if (G.union && to === G.union) to = 'LIT';
@@ -16293,11 +17246,13 @@ window.VY = window.VY || {};
     // the written story ends: from here on only the procedural years (at once for a Lithuania off the historical track)
     if (G.flags.procedural && !G.flags.proc_dawn && !Game.historyWritten()) { G.flags.proc_dawn = G.day; if (Game.procDawn) Game.procDawn(); }
   };
-  // the chronicle (events_c and later) is written up to this day for the historical republic
-  Game.HISTORY_END = '1939-09-02';
+  // the chronicle (events_c and later) is written up to this day for the historical republic, and from
+  // 1940 for a Lithuania under occupation (the Soviet years, whichever way the country lost its state)
+  Game.HISTORY_END = '2026-01-01';
   Game.historyWritten = function () {
     const G = VY.G;
-    return G.day < U.dayOf(Game.HISTORY_END) && G.phase === 'independent' && G.form === 'republic';
+    if (G.day >= U.dayOf(Game.HISTORY_END)) return false;
+    return (G.phase === 'independent' && G.form === 'republic') || (G.phase === 'occupation' && U.yearOf(G.day) >= 1940);
   };
 
   Game.setForm = function (f, ctx) {
@@ -16312,7 +17267,11 @@ window.VY = window.VY || {};
     if (f === 'aistija' && !Game.atWar('LIT', 'LAT')) Game.formUnion('LAT');
     if (G.union && f !== 'commonwealth' && f !== 'aistija') { if (G.countries[G.union]) G.countries[G.union].ally = false; delete G.union; delete G.unionLands; }
     if (f === 'autonomy') { G.countries.RUS.opinion = Math.max(G.countries.RUS.opinion, 10); }
-    if (f === 'movement') delete G.flags.independence_lost_pending;
+    if (f === 'movement') {
+      delete G.flags.independence_lost_pending;
+      // a state that has ceased to exist fights no wars: the underground does not inherit them (a rising is its own)
+      for (const w of G.wars.slice()) if ((w.a.includes('LIT') || w.b.includes('LIT')) && !(G.uprising && w.name === G.uprising.name)) Game.makePeace({ name: w.name, only: 'LIT', keep: 'status_quo' }, { silent: true });
+    }
     if (old !== f && !(ctx && ctx.silent)) {
       Game.log(`We are now ${F.name}.`, 'good');
       if (VY.UI) VY.UI.toast(`<b>${U.esc(F.name)}</b> is proclaimed.`);
@@ -16732,14 +17691,26 @@ window.VY = window.VY || {};
     [1883, 1888, L('Jonas Basanavičius', 'Editor of Aušra', 'National revival', 'basanavicius', 'The physician who gave the nation its first newspaper and its first dawn.')],
     [1889, 1898, L('Vincas Kudirka', 'Editor of Varpas', 'Liberal nationalism', 'kudirka', 'Doctor, satirist and author of the national anthem.')],
     [1899, 1916, L('Jonas Basanavičius', 'Patriarch of the Nation', 'National revival', 'basanavicius', 'Chairman of the Great Seimas of Vilnius in 1905.')],
-    [1917, 1918, L('Antanas Smetona', 'Chairman of the Council of Lithuania', 'National unity', 'smetona', 'The careful editor who will sign the Act of Independence.')]
+    [1917, 1918, L('Antanas Smetona', 'Chairman of the Council of Lithuania', 'National unity', 'smetona', 'The careful editor who will sign the Act of Independence.')],
+    // under Soviet rule: the partisan commanders, then the leader of Sajudis
+    [1949, 1953, L('Jonas Žemaitis-Vytautas', 'Chairman of the Union of Lithuanian Freedom Fighters', 'Armed resistance', null, 'Artillery officer turned partisan commander; signatory of the Declaration of 16 February 1949.')],
+    [1954, 1956, L('Adolfas Ramanauskas-Vanagas', 'Commander of the Lithuanian Partisans', 'Armed resistance', null, 'Teacher and the last commander of the partisans, captured in 1956 and executed in 1957.')],
+    [1988, 1990, L('Vytautas Landsbergis', 'Chairman of the Sąjūdis Council', 'Singing Revolution', null, 'Musicologist and professor at the Conservatory, leader of the movement for independence.')]
   ];
   const STATE_HIST = {
     // a fourth element is a condition on the flags of the run (who governs after the coup of December 1926)
     republic: [[1918, 1920, L('Antanas Smetona', 'President of Lithuania', 'National unity', 'smetona', 'First President of the Republic.')], [1920, 1925, L('Aleksandras Stulginskis', 'President of Lithuania', 'Christian Democracy', 'stulginskis', 'Agronomist, Christian Democrat, chairman of the Constituent Seimas.')],
       [1927, 1940, L('Antanas Smetona', 'President of Lithuania', 'Authoritarian nationalism', 'smetona', 'Brought back to the presidency by the officers\' coup of December 1926; rules with the Nationalist Union.'), f => f.hc_coup !== undefined],
       [1926, 1929, L('Kazys Grinius', 'President of Lithuania', 'Peasant Populism', 'grinius', 'Physician and Populist, elected President by the left-wing Seimas of 1926.'), f => f.hc_left_govt !== undefined],
-      [1926, 1926, L('Aleksandras Stulginskis', 'President of Lithuania', 'Christian Democracy', 'stulginskis', 'Agronomist, Christian Democrat, chairman of the Constituent Seimas.')]],
+      [1926, 1926, L('Aleksandras Stulginskis', 'President of Lithuania', 'Christian Democracy', 'stulginskis', 'Agronomist, Christian Democrat, chairman of the Constituent Seimas.')],
+      // the restored republic (events_f)
+      [1990, 1992, L('Vytautas Landsbergis', 'Chairman of the Supreme Council', 'Singing Revolution', null, 'Leader of Sąjūdis, who chaired the vote of 11 March 1990.'), f => f.hf_restored !== undefined],
+      [1993, 1997, L('Algirdas Brazauskas', 'President of Lithuania', 'Social democracy', null, 'The communist leader who broke his party from Moscow in 1989.'), f => f.hf_restored !== undefined],
+      [1998, 2002, L('Valdas Adamkus', 'President of Lithuania', 'Liberal conservatism', null, 'Refugee of 1944, American environmental official, elected President in 1998.'), f => f.hf_restored !== undefined],
+      [2003, 2003, L('Rolandas Paksas', 'President of Lithuania', 'Liberal democracy', null, 'Former Prime Minister and stunt pilot, impeached in 2004.'), f => f.hf_restored !== undefined],
+      [2004, 2008, L('Valdas Adamkus', 'President of Lithuania', 'Liberal conservatism', null, 'Elected again after the impeachment of Paksas.'), f => f.hf_restored !== undefined],
+      [2009, 2018, L('Dalia Grybauskaitė', 'President of Lithuania', 'Independent', null, 'Former European Commissioner, the first woman President of Lithuania.'), f => f.hf_restored !== undefined],
+      [2019, 2026, L('Gitanas Nausėda', 'President of Lithuania', 'Independent', null, 'Economist, elected in 2019 and re-elected in 2024.'), f => f.hf_restored !== undefined]],
     kingdom: [[1918, 1928, L('Mindaugas II', 'King of Lithuania', 'Constitutional monarchy', 'mindaugas_ii', 'Wilhelm Karl, Duke of Urach, elected by the Council of Lithuania.')], [1800, 1815, L('Dominik Radziwiłł', 'King of Lithuania', 'Napoleonic monarchy', 'cat_portrait', 'The richest magnate of the Grand Duchy, who raised a regiment of lancers for the Emperor.')]],
     gdl: [[1812, 1815, L('Stanisław Sołtan', 'President of the Provisional Government', 'Grand Duchy patriotism', 'soltan', 'Marshal of the nobility, president of the Commission of the Provisional Government.')], [1862, 1870, L('Konstantinas Kalinauskas', 'Head of the Grand Duchy', 'Peasant democracy', 'kalinauskas', 'The Red leader who promised land to those who till it.')], [1905, 1930, L('Mykolas Römeris', 'Chancellor of the Grand Duchy', 'Krajowcy federalism', 'romeris', 'A jurist for whom the homeland belongs to all its peoples.')]],
     commonwealth: [[1830, 1834, L('Adam Jerzy Czartoryski', 'President of the National Government', 'Commonwealth restoration', 'czartoryski', 'The prince who led the government of the November Rising.')], [1863, 1868, L('Romuald Traugutt', 'Dictator of the Insurrection', 'Commonwealth restoration', 'traugutt', 'A retired officer who took command of the January Rising.')], [1918, 1935, L('Józef Piłsudski', 'Chief of State of the Union', 'Federalism', 'pilsudski', 'Born at Zalavas near Vilnius; dreams of a federation from the Baltic to the Black Sea.')]],
@@ -17052,6 +18023,11 @@ window.VY = window.VY || {};
         w.dictated = G.day;
         fire({ id: pid('terms'), title: 'Terms Are Dictated', pic: 'war', major: true, desc: `${foe.map(t => Game.countryName(t)).join(', ')} offers peace: they keep everything their army holds.`,
           options: [{ text: 'Accept. Save what is left.', effects: { peace: { name: w.name, keep: 'everything' }, unity: -10 } }, { text: 'Fight on.', effects: { unity: 3 } }] });
+      } else if (age > 1095 && Math.abs(score) <= 35 && (!w.stale || G.day - w.stale > 730)) {
+        // a war neither side can win burns out: after three years the guns fall silent along the line
+        w.stale = G.day;
+        fire({ id: pid('stalemate'), title: 'The War Burns Out', pic: 'diplomacy', major: true, desc: `After ${Math.floor(age / 365)} years of fighting, neither we nor ${foe.map(t => Game.countryName(t)).join(', ')} can break the other. Mediators propose an armistice along the front line.`,
+          options: [{ text: 'An armistice where the armies stand.', effects: { peace: { name: w.name, keep: 'control' }, unity: -2 } }, { text: 'Peace on the old borders.', effects: { peace: { name: w.name, keep: 'status_quo' } } }, { text: 'Fight on.', effects: { unity: -3 } }] });
       }
     }
   }
