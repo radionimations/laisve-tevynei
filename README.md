@@ -209,7 +209,6 @@ The game is one HTML file (`index.html` on the site); it needs an internet conne
 - `commonwealth`: Flag of the Polish-Lithuanian-Ruthenian Commonwealth (January Uprising).svg, Elevatorrailfan (CC BY-SA 4.0) https://commons.wikimedia.org/wiki/File:Flag_of_the_Polish-Lithuanian-Ruthenian_Commonwealth_(January_Uprising).svg
 - `autonomy`: Royal banner of the Grand Duchy of Lithuania.svg, Samhanin (CC0) https://commons.wikimedia.org/wiki/File:Royal_banner_of_the_Grand_Duchy_of_Lithuania.svg
 - `workers`: Flag of the Lithuanian-Byelorussian SSR.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian-Byelorussian_SSR.svg
-- `aistija`: Flag of the Baltic Assembly.png (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Baltic_Assembly.png
 - `ltssr40`: Flag of the Lithuanian Soviet Socialist Republic (1940–1953).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian_Soviet_Socialist_Republic_(1940%E2%80%931953).svg
 - `ltssr`: Flag of the Lithuanian Soviet Socialist Republic (1953–1988, 3-2).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian_Soviet_Socialist_Republic_(1953%E2%80%931988,_3-2).svg
 - `RUS`: Flag of Russia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Russia.svg
