@@ -265,3 +265,31 @@ The game is one HTML file (`index.html` on the site); it needs an internet conne
 - `UKR`: Flag of Ukraine.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Ukraine.svg
 - `RAG`: Republic of Dubrovnik Flag.png (Public domain) https://commons.wikimedia.org/wiki/File:Republic_of_Dubrovnik_Flag.png
 - `DAN`: Flag of the Free City of Danzig.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Free_City_of_Danzig.svg
+- `GDR`: Flag of East Germany.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_East_Germany.svg
+- `FRG`: Flag of Germany.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Germany.svg
+- `SVK39`: Flag of Slovakia (1939–1945).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Slovakia_(1939%E2%80%931945).svg
+- `SVK`: Flag of Slovakia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Slovakia.svg
+- `KOS`: Flag of Kosovo.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Kosovo.svg
+- `CRO`: Flag of Croatia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Croatia.svg
+- `NDH`: Flag of Banate of Croatia (1939-1941).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Banate_of_Croatia_(1939-1941).svg
+- `SLO`: Flag of Slovenia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Slovenia.svg
+- `BIH`: Flag of Bosnia and Herzegovina.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Bosnia_and_Herzegovina.svg
+- `MKD`: Flag of North Macedonia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_North_Macedonia.svg
+- `MDA`: Flag of Moldova.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Moldova.svg
+- `HUN_PR`: Flag of Hungary (1949-1956).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Hungary_(1949-1956).svg
+- `ROM_PR`: Flag of Romania (1952–1965).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Romania_(1952%E2%80%931965).svg
+- `ROM_SR`: Flag of Romania (1965–1989).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Romania_(1965%E2%80%931989).svg
+- `BUL_PR`: Flag of Bulgaria (1971–1990).svg, Scroch (CC BY-SA 3.0) https://commons.wikimedia.org/wiki/File:Flag_of_Bulgaria_(1971%E2%80%931990).svg
+- `YUG_SFRY`: Flag of Yugoslavia (1946-1992).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Yugoslavia_(1946-1992).svg
+- `YUG_FRY`: Flag of Serbia and Montenegro (1992–2006).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Serbia_and_Montenegro_(1992%E2%80%932006).svg
+- `SER_M`: Flag of Serbia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Serbia.svg
+- `MNE_M`: Flag of Montenegro.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Montenegro.svg
+- `ALB_K`: Flag of Albania (1934–1939).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Albania_(1934%E2%80%931939).svg
+- `ALB_PR`: Flag of Albania (1946–1992).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Albania_(1946%E2%80%931992).svg
+- `ALB_M`: Flag of Albania.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Albania.svg
+- `GRE_M`: Flag of Greece.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Greece.svg
+- `BLR_95`: Flag of Belarus.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Belarus.svg
+- `ITA_REP`: Flag of Italy.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Italy.svg
+- `POL_M`: Flag of Poland.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Poland.svg
+- `AUT_M`: Flag of Austria.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Austria.svg
+- `TUR_M`: Flag of Turkey.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Turkey.svg
