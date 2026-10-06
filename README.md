@@ -22,7 +22,11 @@ The game is one HTML file (`index.html` on the site); it needs an internet conne
 - Under occupation: raise awareness, literacy, networks and tension, keep police suspicion low,
   then launch a rising from the ignition points you choose.
 - As a state: recruit in the army panel, select units by their counters, right-click a province
-  to move or attack. Battles are fought province by province.
+  to move or attack. Battles are fought province by province. Selected units can also take a standing
+  order (Offense, Liberators, Defense or AI) and act on their own until you order them yourself.
+- Enemies mobilize against you in proportion to their strength and yours; in a union (the Commonwealth,
+  Aistija) the partner nation's army fights beside yours under its own generals.
+- Music and sound effects: Menu, Sound.
 - Saves stay in the browser (Menu, Save); Export gives a save code you can keep anywhere.
 
 ## Sources and licences
@@ -38,6 +42,11 @@ The game is one HTML file (`index.html` on the site); it needs an internet conne
   (district shapes, provinces and ownership timelines) is a derivative database and is shared under the ODbL.
 - 1897 census by governorate (languages, population): Transcultural Empire GIS of the 1897 and 1926 censuses,
   heiDATA, Heidelberg University (doi:10.11588/data/10064), CC BY 4.0.
+- 1897 census by uezd (native language): the published census tables as given by Demoscope Weekly
+  (https://www.demoscope.ru/weekly/ssp/rus_lan_97_uezd.php); the Suwałki and Łomża uezds from the census volumes.
+  The make-up around 1800 is reconstructed from it (see tools/eth_hist.py).
+- Music: recordings from Wikimedia Commons, public domain or openly licensed, listed below.
+- Flags: Wikimedia Commons, mostly public domain; reconstructions and other licensed drawings are credited below.
 - Rivers, modern first-level regions (outside the old empires) and towns: Natural Earth (public domain).
 - Matching the story's older district names to the historical districts used geoBoundaries gbOpen (CC BY 4.0)
   and CShapes 2.0 (Schvitz et al. 2022, CC BY-NC-SA 4.0) at build time.
@@ -171,3 +180,88 @@ The game is one HTML file (`index.html` on the site); it needs an internet conne
 - `ycas`: File:Martynas Ycas.jpg, Unknown authorUnknown author, between 1912 and 1914date QS:P,+1912-00- (Public domain pd) https://commons.wikimedia.org/wiki/File:Martynas_Ycas.jpg
 - `zemaite`: File:Žemaitė su A. ir A. Bulotomis (cropped).jpg, Blowwhite, 2024-11-17 16:22:12 (CC0 cc0) https://commons.wikimedia.org/wiki/File:%C5%BDemait%C4%97_su_A._ir_A._Bulotomis_(cropped).jpg
 - `zukauskas`: File:Silvestras-Žukauskas.jpg, Arz, 2008-02-21 (Public domain pd) https://commons.wikimedia.org/wiki/File:Silvestras-%C5%BDukauskas.jpg
+
+### Music
+- Symphony No. 100 "Military", II. Allegretto (Joseph Haydn), Salzburg Mozarteum Orchestra, Fritz Weidlich. Public domain. https://commons.wikimedia.org/wiki/File:Haydn;_Symphony_No._100_In_G_Major_%22Military%22-_2._Allegretto.ogg
+- Symphony No. 3 "Eroica", I. Allegro con brio (Ludwig van Beethoven), Musopen Symphony Orchestra. CC0. https://commons.wikimedia.org/wiki/File:Beethoven_SymphonyNo.3Eroica_LudwigVanBeethoven-SymphonyNo.3InEFlatMajorEroicaOp.55-01-AllegroConBrio.ogg
+- Symphony No. 3 "Eroica", III. Scherzo (Ludwig van Beethoven), Musopen Symphony Orchestra. CC0. https://commons.wikimedia.org/wiki/File:Beethoven_SymphonyNo.3Eroica_LudwigVanBeethoven-SymphonyNo.3InEFlatMajorEroicaOp.55-03-ScherzoAllegroVivace.ogg
+- Symphony No. 5, I. Allegro con brio (Ludwig van Beethoven), performer not named. Public domain. https://commons.wikimedia.org/wiki/File:Ludwig_van_Beethoven_-_symphony_no._5_in_c_minor,_op._67_-_i._allegro_con_brio.ogg
+- Wellington's Victory (for panharmonicon) (Ludwig van Beethoven), Wladyslav Kozjin. Public domain. https://commons.wikimedia.org/wiki/File:Piece_for_Panharmonikon_-_Wellingtons_Sieg,_oder_die_Schlacht_bei_Vittoria_(Wellington%E2%80%99s_Victory,_or_the_Battle_of_Vittoria).ogg
+- Polonaise in A major, Op. 40 No. 1 "Military" (Frédéric Chopin), performer not named. CC0. https://commons.wikimedia.org/wiki/File:Chopin_-_Polonaise_op._40_no_1.ogg
+- Polonaise in A-flat major, Op. 53 "Heroic" (Frédéric Chopin), Luke Faulkner. Public domain. https://commons.wikimedia.org/wiki/File:Chopin_-_Polonaise_No._6_in_A-flat_major,_Op._53_%27H%C3%A9ro%C3%AFque%27_(Luke_Faulkner).flac
+- Ruslan and Lyudmila, overture (Mikhail Glinka), М.И.Глинка (M.I. Glinka). Public domain. https://commons.wikimedia.org/wiki/File:%D0%A3%D0%B2%D0%B5%D1%80%D1%82%D1%8E%D1%80%D0%B0_%D0%BA_%D0%BE%D0%BF%D0%B5%D1%80%D0%B5_%22%D0%A0%D1%83%D1%81%D0%BB%D0%B0%D0%BD_%D0%B8_%D0%9B%D1%8E%D0%B4%D0%BC%D0%B8%D0%BB%D0%B0%22.oga
+- Radetzky March (Johann Strauss I), "The President's Own" United States Marine Band. Public domain. https://commons.wikimedia.org/wiki/File:STRAUSS_Radetzky_March_-_%22The_President%27s_Own%22_U.S._Marine_Band.opus
+- Night on Bald Mountain (Modest Mussorgsky), Modest Petrovich Mussorgsky. Public domain. https://commons.wikimedia.org/wiki/File:Modest_Mussorgsky_-_night_on_bald_mountain.ogg
+- Má vlast: Vltava (Bedřich Smetana), Musopen Symphony Orchestra. CC0. https://commons.wikimedia.org/wiki/File:Smetana,_M%C3%A1_vlast_-_Vltava_-_The_Moldau.ogg
+- Marche slave (Pyotr Ilyich Tchaikovsky), Omega13a. CC BY 4.0. https://commons.wikimedia.org/wiki/File:Marche_Slave,_Op._31_-_Pyotr_Ilyich_Tchaikovsky.ogg
+- In the Steppes of Central Asia (Alexander Borodin), Musopen Symphony Orchestra. CC0. https://commons.wikimedia.org/wiki/File:Alexander_Borodin_-_In_The_Steppes_Of_Central_Asia.ogg
+- The Year 1812, festival overture (Pyotr Ilyich Tchaikovsky), "The President's Own" United States Marine Band. Public domain. https://commons.wikimedia.org/wiki/File:1812_Overture_-_United_States_Marine_Band.opus
+- Farewell of Slavianka (Vasily Agapkin), United States Coast Guard Band. Public domain. https://commons.wikimedia.org/wiki/File:Farewell_of_Slavianka_(USCGB).ogg
+- Lietuva, Tėvyne mūsų (recorded 1915) (Vincas Kudirka), Columbia record E2356, 1915. Public domain. https://commons.wikimedia.org/wiki/File:Lietuva,_T%C4%97vyne_m%C5%ABs%C5%B3_(1915)_%E2%80%94_Columbia_E2356.ogg
+- Tautiška giesmė (Vincas Kudirka), Lithuanian Military Orchestra, Egidijus Ališauskas. Public domain. https://commons.wikimedia.org/wiki/File:National_anthem_of_Lithuania_performed_by_the_Lithuanian_Military_Orchestra,_conducted_by_Egidijus_Ali%C5%A1auskas.mp3
+
+### Flags
+- `movement`: Flag of Lithuania (state).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Lithuania_(state).svg
+- `republic`: Flag of Lithuania (1918–1940).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Lithuania_(1918%E2%80%931940).svg
+- `republic89`: Flag of Lithuania.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Lithuania.svg
+- `kingdom`: Flag of Lithuania (1918).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Lithuania_(1918).svg
+- `gdl`: Flag of the Grand Duchy of Lithuania 1578.svg, Лобачев Владимир (CC0) https://commons.wikimedia.org/wiki/File:Flag_of_the_Grand_Duchy_of_Lithuania_1578.svg
+- `commonwealth`: Flag of the Polish-Lithuanian-Ruthenian Commonwealth (January Uprising).svg, Elevatorrailfan (CC BY-SA 4.0) https://commons.wikimedia.org/wiki/File:Flag_of_the_Polish-Lithuanian-Ruthenian_Commonwealth_(January_Uprising).svg
+- `autonomy`: Royal banner of the Grand Duchy of Lithuania.svg, Samhanin (CC0) https://commons.wikimedia.org/wiki/File:Royal_banner_of_the_Grand_Duchy_of_Lithuania.svg
+- `workers`: Flag of the Lithuanian-Byelorussian SSR.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian-Byelorussian_SSR.svg
+- `aistija`: Flag of the Baltic Assembly.png (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Baltic_Assembly.png
+- `ltssr40`: Flag of the Lithuanian Soviet Socialist Republic (1940–1953).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian_Soviet_Socialist_Republic_(1940%E2%80%931953).svg
+- `ltssr`: Flag of the Lithuanian Soviet Socialist Republic (1953–1988, 3-2).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Lithuanian_Soviet_Socialist_Republic_(1953%E2%80%931988,_3-2).svg
+- `RUS`: Flag of Russia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Russia.svg
+- `RUS_IMP`: Flag of Russia (1858–1896).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Russia_(1858%E2%80%931896).svg
+- `RUSR`: Flag of Russia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Russia.svg
+- `SOV`: Flag of the Russian Soviet Federative Socialist Republic (1918–1925).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Russian_Soviet_Federative_Socialist_Republic_(1918%E2%80%931925).svg
+- `USSR`: Flag of the Soviet Union.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Soviet_Union.svg
+- `PRU`: Flag of the Kingdom of Prussia (1803-1892).svg, Drawing created by David Liuzzo (Attribution) https://commons.wikimedia.org/wiki/File:Flag_of_the_Kingdom_of_Prussia_(1803-1892).svg
+- `GER`: Flag of Germany (1867–1918).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Germany_(1867%E2%80%931918).svg
+- `WEI`: Flag of Germany (1919-1933).svg, The original uploader was Skipper Michael at Palatine German Wikipedia . (CC BY-SA 3.0) https://commons.wikimedia.org/wiki/File:Flag_of_Germany_(1919-1933).svg
+- `FRA`: Flag of France.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_France.svg
+- `FRA_BOURBON`: Flag of France (1814–1830).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_France_(1814%E2%80%931830).svg
+- `DOW`: Flag of the Duchy of Warsaw.svg, TRAJAN 117 (CC BY-SA 3.0) https://commons.wikimedia.org/wiki/File:Flag_of_the_Duchy_of_Warsaw.svg
+- `POL`: Flag of Poland (1919–1928).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Poland_(1919%E2%80%931928).svg
+- `LAT`: Flag of Latvia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Latvia.svg
+- `EST`: Flag of Estonia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Estonia.svg
+- `BLR`: Flag of Belarus (1918, 1991–1995).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Belarus_(1918,_1991%E2%80%931995).svg
+- `AUS`: Flag of the Habsburg Monarchy.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Habsburg_Monarchy.svg
+- `AUS_HU`: Ensign of Austro-Hungarian civil fleet (1869-1918).svg (Public domain) https://commons.wikimedia.org/wiki/File:Ensign_of_Austro-Hungarian_civil_fleet_(1869-1918).svg
+- `GBR`: Flag of the United Kingdom (3-5).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Kingdom_(3-5).svg
+- `BER`: Flag of the West Russian Volunteer Army.svg, MrPenguin20 (CC BY-SA 3.0) https://commons.wikimedia.org/wiki/File:Flag_of_the_West_Russian_Volunteer_Army.svg
+- `CLT`: Flag of Central Lithuania.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Central_Lithuania.svg
+- `ENT`: Flag of the Klaipėda Region.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Klaip%C4%97da_Region.svg
+- `SWE`: Flag of Sweden.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Sweden.svg
+- `DEN`: Flag of Denmark.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Denmark.svg
+- `NOR`: Flag of Norway.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Norway.svg
+- `FIN`: Flag of Finland.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Finland.svg
+- `SAX`: Flag of Saxony.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Saxony.svg
+- `BAV`: Flag of Bavaria (lozengy).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Bavaria_(lozengy).svg
+- `MEC`: 19th Century Flag of Mecklenburg-Schwerin.png (Public domain) https://commons.wikimedia.org/wiki/File:19th_Century_Flag_of_Mecklenburg-Schwerin.png
+- `THU`: Flagge Großherzogtum Sachsen-Weimar-Eisenach (1813-1897).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flagge_Gro%C3%9Fherzogtum_Sachsen-Weimar-Eisenach_(1813-1897).svg
+- `AUT`: Flag of Austria.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Austria.svg
+- `HUN`: Flag of Hungary.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Hungary.svg
+- `CZE`: Flag of the Czech Republic.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Czech_Republic.svg
+- `YUG`: Flag of Yugoslavia (1918–1941).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Yugoslavia_(1918%E2%80%931941).svg
+- `SER`: Flag of Serbia (1882–1918).svg, Guilherme Paula (CC BY-SA 3.0) https://commons.wikimedia.org/wiki/File:Flag_of_Serbia_(1882%E2%80%931918).svg
+- `MNE`: Flag of Montenegro (1905–1918).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Montenegro_(1905%E2%80%931918).svg
+- `ALB`: Flag of Albania (1914–1920).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Albania_(1914%E2%80%931920).svg
+- `GRE`: Flag of Greece (1822-1978).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Greece_(1822-1978).svg
+- `BUL`: Flag of Bulgaria.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Bulgaria.svg
+- `ERU`: Flag of Eastern Rumelia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Eastern_Rumelia.svg
+- `ROM`: Flag of Romania.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Romania.svg
+- `ROM_UP`: Flag of the United Principalities of Wallachia and Moldavia (1859 - 1862).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Principalities_of_Wallachia_and_Moldavia_(1859_-_1862).svg
+- `MOL`: Flag of Moldavia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Moldavia.svg
+- `WAL`: Flag of Wallachia.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Wallachia.svg
+- `TUR`: Flag of the Ottoman Empire (1844–1922).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Ottoman_Empire_(1844%E2%80%931922).svg
+- `TUR_REP`: Flag of Turkey.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Turkey.svg
+- `ITA`: Flag of the Kingdom of Naples.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Kingdom_of_Naples.svg
+- `ITA_2S`: Flag of the Kingdom of the Two Sicilies (1816).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Kingdom_of_the_Two_Sicilies_(1816).svg
+- `ITA_KI`: Flag of Italy (1861–1946).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Italy_(1861%E2%80%931946).svg
+- `KRA`: Flag of Kraków(2-3).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Krak%C3%B3w(2-3).svg
+- `WUK`: Flag of Ukraine (1917–1921).svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Ukraine_(1917%E2%80%931921).svg
+- `UKR`: Flag of Ukraine.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_Ukraine.svg
+- `RAG`: Republic of Dubrovnik Flag.png (Public domain) https://commons.wikimedia.org/wiki/File:Republic_of_Dubrovnik_Flag.png
+- `DAN`: Flag of the Free City of Danzig.svg (Public domain) https://commons.wikimedia.org/wiki/File:Flag_of_the_Free_City_of_Danzig.svg
