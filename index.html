@@ -18238,7 +18238,9 @@ window.VY = window.VY || {};
   Game.historyWritten = function () {
     const G = VY.G;
     if (G.day >= U.dayOf(Game.HISTORY_END)) return false;
-    return (G.phase === 'independent' && G.form === 'republic') || (G.phase === 'occupation' && U.yearOf(G.day) >= 1940);
+    // every Lithuania, whatever its form: the chronicle's events carry versions for each, and the generators that
+    // would contradict history (elections, ultimatums, invasions) wait until it ends
+    return true;
   };
 
   Game.setForm = function (f, ctx) {
@@ -18853,7 +18855,7 @@ window.VY = window.VY || {};
     Game.log('History is no longer written. The years ahead belong to you.', 'info');
     fire({
       id: pid('dawn'), title: 'The Unwritten Years', pic: 'politics', major: true,
-      desc: `The almanacs of ${U.yearOf(G.day)} are printed and the past is settled. From here on no chronicle tells what happens next: elections, harvests, crises and wars will come as they come.\n\nThe national plans in the focus tree under "The Unwritten Years" go on.`,
+      desc: `The almanacs of ${U.yearOf(G.day)} are printed and the past is settled. From here on no chronicle tells what happens next: elections, harvests, crises and wars will come as they come.\n\nThe national plans in the focus tree go on.`,
       options: [{ text: 'Into the unknown.', effects: { pp: 25 } }]
     });
   };
@@ -20170,9 +20172,9 @@ window.VY = window.VY || {};
     const tabs = el('div', { class: 'tabs' });
     const mkTab = (id, label) => { const t = el('div', { class: 'tab' + (tree === id ? ' on' : ''), onclick: () => { UI.full = null; UI.closeFull(); UI.openFull(id === 'main' ? 'focus' : id); } }, label); tabs.appendChild(t); };
     mkTab('main', 'National Focus'); mkTab('cities', 'Cities of the Nation');
-    if (VY.G.proc && VY.G.proc.plans && VY.G.proc.plans.length) mkTab('plans', 'The Unwritten Years');
+    if (VY.G.proc && VY.G.proc.plans && VY.G.proc.plans.length) mkTab('plans', 'National Plans');
     F.slotEl = el('div', { class: 'focusslot' });
-    v.appendChild(el('div', { class: 'fvh plate' }, el('div', { class: 'title' }, tree === 'cities' ? 'Cities of the Nation' : tree === 'plans' ? 'The Unwritten Years' : 'National Focus'), tabs, F.slotEl, el('div', { style: { flex: 1 } }),
+    v.appendChild(el('div', { class: 'fvh plate' }, el('div', { class: 'title' }, tree === 'cities' ? 'Cities of the Nation' : tree === 'plans' ? 'National Plans' : 'National Focus'), tabs, F.slotEl, el('div', { style: { flex: 1 } }),
       el('button', { class: 'btn small', onclick: () => F.jumpToNow() }, 'Current era'),
       el('button', { class: 'btn icon small', onclick: () => F.zoom(-0.1), html: VY.ICONS.svg('minus') }),
       el('button', { class: 'btn icon small', onclick: () => F.zoom(0.1), html: VY.ICONS.svg('plus') }),
