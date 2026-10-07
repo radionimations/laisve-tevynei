@@ -599,6 +599,7 @@ window.VY = window.VY || {};
     if (type === 'guards') s += `<path d="M10 2.5l1 2h2l-1.6 1.3.6 2-2-1.2-2 1.2.6-2L7 4.5h2z" fill="#111"/>`;
     if (type === 'garrison') s += `<path d="M1 10.5h18" ${st}/>`;
     if (type === 'armored_train') s = `<rect x="4" y="4" width="12" height="6" ${st}/><circle cx="7" cy="11" r="1.4" fill="#111"/><circle cx="13" cy="11" r="1.4" fill="#111"/>`;
+    if (type === 'armor') s = `<rect x="4.5" y="4.2" width="11" height="5.6" rx="2.8" ${st}/>`;
     return `<svg viewBox="0 0 20 14">${box}${s}</svg>`;
   };
 })();
@@ -6083,6 +6084,676 @@ VY.CAMPAIGN_PARTS.push({
     { from: '1813-08-20', to: '1813-10-10', tags: ['FRA', 'SAX', 'DOW'], pct: 0.25 },  // hunger, typhus and desertion in Saxony
   ],
 });
+
+// ---------------------------------------------------------------- c1914.js
+// The Great War in the east, 1914 to the Peace of Brest-Litovsk (3 March 1918): East Prussia and Tannenberg,
+// Galicia, the battles for Poland, Gorlice-Tarnow and the Great Retreat of 1915, Kovno and Vilna, the
+// conquest of Serbia, the Brusilov offensive, Romania, Riga and the last German advance of February 1918.
+// Armies are the field armies (one unit each, with their strength at the time); positions from the standard
+// histories (Stone, The Eastern Front 1914-1917; Showalter, Tannenberg; the Reichsarchiv and Austrian official
+// histories). The story's own war of the same name joins it, so the Lithuanian events and these armies are
+// one war. Occupations the armies do not reach are in js/data/world.js.
+(function () {
+  const P = {
+    Insterburg: [54.63, 21.81], Gumbinnen: [54.59, 22.20], Stalluponen: [54.64, 22.57], Tilsit: [55.08, 21.88], Konigsberg: [54.71, 20.51],
+    Tapiau: [54.71, 21.07], Allenstein: [53.78, 20.48], Hohenstein: [53.59, 20.29], Neidenburg: [53.36, 20.43], Soldau: [53.20, 20.24],
+    Mlawa: [53.11, 20.38], Lotzen: [54.03, 21.76], Lyck: [53.83, 22.36], Goldap: [54.31, 22.30], Suwalki: [54.10, 22.93], Augustow: [53.84, 22.98],
+    Osowiec: [53.48, 22.65], Lomza: [53.18, 22.06], Ostroleka: [53.08, 21.57], Przasnysz: [53.02, 20.88], Pultusk: [52.70, 21.08],
+    Modlin: [52.44, 20.70], Warsaw: [52.23, 21.01], Lodz: [51.76, 19.46], Lowicz: [52.11, 19.94], Bolimow: [52.08, 20.16], Ivangorod: [51.56, 21.85],
+    Radom: [51.40, 21.15], Kielce: [50.87, 20.63], Czestochowa: [50.81, 19.12], Krakow: [50.06, 19.94], Tarnow: [50.01, 20.99], Gorlice: [49.66, 21.16],
+    Jaslo: [49.75, 21.47], Dukla: [49.56, 21.68], Sanok: [49.56, 22.20], Przemysl: [49.78, 22.77], Jaroslaw: [50.02, 22.68], Rzeszow: [50.04, 22.00],
+    Krasnik: [50.92, 22.22], Lublin: [51.25, 22.57], Krasnystaw: [50.98, 23.17], Chelm: [51.14, 23.47], Zamosc: [50.72, 23.25], Komarow: [50.63, 23.48],
+    Tomaszow: [50.45, 23.42], RawaRuska: [50.23, 23.62], Lemberg: [49.84, 24.03], Grodek: [49.79, 23.65], Stryj: [49.26, 23.85], Halicz: [49.12, 24.72],
+    Brzezany: [49.45, 24.94], Zloczow: [49.81, 24.90], Tarnopol: [49.55, 25.59], Brody: [50.08, 25.15], Dubno: [50.42, 25.73], Rovno: [50.62, 26.25],
+    Lutsk: [50.75, 25.33], Kovel: [51.21, 24.71], Proskurov: [49.42, 26.99], Czernowitz: [48.29, 25.94], Kolomea: [48.53, 25.04], Stanislau: [48.92, 24.71],
+    Brest: [52.10, 23.70], Kobryn: [52.21, 24.36], Pinsk: [52.12, 26.10], Baranovichi: [53.13, 26.01], Slonim: [53.09, 25.32], Volkovysk: [53.16, 24.45],
+    Bialystok: [53.13, 23.16], Bielsk: [52.77, 23.19], Grodno: [53.68, 23.83], Lida: [53.89, 25.30], Vilna: [54.69, 25.28], Kovno: [54.90, 23.90],
+    Mariampol: [54.56, 23.35], Shavli: [55.93, 23.31], Libau: [56.51, 21.01], Mitau: [56.65, 23.72], Riga: [56.95, 24.11], Olai: [56.79, 23.94],
+    Jakobstadt: [56.50, 25.86], Dvinsk: [55.87, 26.54], Sventiany: [55.13, 26.16], Smorgon: [54.48, 26.40], Molodechno: [54.31, 26.84],
+    Naroch: [54.85, 26.75], Postavy: [55.11, 26.83], Minsk: [53.90, 27.56], Borisov: [54.23, 28.50], Pskov: [57.82, 28.33], Reval: [59.44, 24.75],
+    Dorpat: [58.38, 26.72], Wenden: [57.31, 25.27], Kyiv: [50.45, 30.52], Zhytomyr: [50.25, 28.66],
+    Belgrade: [44.80, 20.47], Sabac: [44.75, 19.70], Cer: [44.57, 19.47], Valjevo: [44.27, 19.89], Kragujevac: [44.01, 20.91], Nis: [43.32, 21.90],
+    Smederevo: [44.66, 20.93], Krusevac: [43.58, 21.33], Zajecar: [43.90, 22.28], Vidin: [43.99, 22.88],
+    Brasov: [45.65, 25.61], Sibiu: [45.79, 24.15], Bucharest: [44.43, 26.10], Tutrakan: [44.05, 26.62], Svishtov: [43.62, 25.35], Craiova: [44.32, 23.80],
+    TarguJiu: [45.04, 23.27], Ploiesti: [44.94, 26.03], Focsani: [45.70, 27.19], Marasesti: [45.88, 27.23], Iasi: [47.16, 27.59], Constanta: [44.18, 28.63],
+    Pitesti: [44.86, 24.87], Severin: [44.63, 22.66], Ruse: [43.85, 25.97], Braila: [45.27, 27.96]
+  };
+  const R = (d, n) => [d, n, P[n][0], P[n][1]];
+  const at = n => P[n];
+
+  VY.CAMPAIGNS.push({
+    id: 'c1914', name: 'The Great War',
+    start: '1914-08-01', end: '1918-03-03',
+    a: ['GER', 'AUS'], b: ['RUS', 'SER'],
+    join: [['1915-10-14', 'BUL', 'a'], ['1916-08-27', 'ROM', 'b'], ['1917-11-07', 'SOV', 'b']],
+    leave: [['1917-12-09', 'ROM']],
+    title: [['1914-08-01', 'The Great War: the Eastern Front'], ['1917-12-15', 'The Great War: the armistice in the east'], ['1918-02-18', 'The Great War: Operation Faustschlag']],
+    fate: [
+      ['1914-08-01', null, 1.0],
+      ['1915-05-01', 'a', 1.5],    // Gorlice-Tarnow: the shell shortage, the Great Retreat
+      ['1915-10-01', null, 1.0],   // the front settles from Riga to the Romanian border
+      ['1916-06-04', 'b', 1.5],    // the Brusilov offensive
+      ['1916-09-15', 'a', 1.3],    // Romania overrun
+      ['1917-03-15', null, 1.0],   // the February Revolution
+      ['1917-07-15', 'a', 1.6],    // the Kerensky offensive collapses, the army dissolves
+      ['1918-02-18', 'a', 4.0]     // Faustschlag: almost no resistance
+    ],
+    armies: [
+      // ============================================================ Germany
+      { tag: 'GER', name: '8th Army (Prittwitz, then Hindenburg and Ludendorff)', type: 'infantry', men: 150000, exit: '1915-12-31',
+        route: [R('1914-08-10', 'Insterburg'), R('1914-08-20', 'Gumbinnen'), R('1914-08-24', 'Allenstein'), R('1914-08-28', 'Hohenstein'), R('1914-08-31', 'Neidenburg'),
+          R('1914-09-08', 'Lotzen'), R('1914-09-13', 'Gumbinnen'), R('1914-09-25', 'Suwalki'), R('1914-10-12', 'Lyck'), R('1914-11-20', 'Lotzen'),
+          R('1915-02-10', 'Lyck'), R('1915-02-22', 'Augustow'), R('1915-03-15', 'Osowiec'), R('1915-08-10', 'Lomza'), R('1915-08-26', 'Bialystok'), R('1915-09-03', 'Grodno'),
+          R('1915-09-25', 'Lida'), R('1915-11-01', 'Lida')] },
+      { tag: 'GER', name: '9th Army (Hindenburg, Mackensen, then Prince Leopold of Bavaria)', type: 'infantry', men: 220000, exit: '1916-08-01',
+        route: [R('1914-09-28', 'Czestochowa'), R('1914-10-09', 'Radom'), R('1914-10-15', 'Warsaw'), R('1914-10-27', 'Czestochowa'), R('1914-11-14', 'Lodz'),
+          R('1914-12-06', 'Lodz'), R('1915-01-31', 'Bolimow'), R('1915-07-20', 'Bolimow'), R('1915-08-05', 'Warsaw'), R('1915-08-25', 'Bielsk'), R('1915-09-15', 'Slonim'),
+          R('1915-10-15', 'Baranovichi'), R('1916-07-15', 'Baranovichi')] },
+      { tag: 'GER', name: '10th Army (Eichhorn)', type: 'infantry', men: 180000,
+        route: [R('1915-02-01', 'Insterburg'), R('1915-02-10', 'Goldap'), R('1915-02-21', 'Augustow'), R('1915-03-15', 'Suwalki'), R('1915-07-15', 'Mariampol'),
+          R('1915-08-18', 'Kovno'), R('1915-09-08', 'Vilna'), R('1915-09-19', 'Vilna'), R('1915-10-10', 'Smorgon'), R('1916-03-30', 'Smorgon'),
+          R('1917-12-15', 'Smorgon'), R('1918-02-19', 'Molodechno'), R('1918-02-21', 'Minsk'), R('1918-03-03', 'Borisov')] },
+      { tag: 'GER', name: 'Niemen Army (Below), from December 1915 the 8th Army (Hutier)', type: 'infantry', men: 130000,
+        route: [R('1915-04-27', 'Tilsit'), R('1915-05-01', 'Shavli'), R('1915-05-08', 'Libau'), R('1915-07-20', 'Shavli'), R('1915-08-01', 'Mitau'),
+          R('1915-10-01', 'Olai'), R('1917-08-30', 'Olai'), R('1917-09-03', 'Riga'), R('1917-09-20', 'Wenden'), R('1918-02-20', 'Wenden'),
+          R('1918-02-22', 'Dorpat'), R('1918-02-25', 'Reval'), R('1918-03-03', 'Reval')] },
+      { tag: 'GER', name: '12th Army (Gallwitz)', type: 'infantry', men: 170000, exit: '1916-01-31',
+        route: [R('1915-02-15', 'Mlawa'), R('1915-02-24', 'Przasnysz'), R('1915-07-10', 'Mlawa'), R('1915-07-20', 'Przasnysz'), R('1915-07-24', 'Pultusk'),
+          R('1915-08-10', 'Ostroleka'), R('1915-08-25', 'Bielsk'), R('1915-09-05', 'Volkovysk'), R('1915-09-25', 'Slonim'), R('1915-12-15', 'Slonim')] },
+      { tag: 'GER', name: '11th Army (Mackensen)', type: 'infantry', men: 200000, exit: '1915-09-20',
+        route: [R('1915-04-28', 'Gorlice'), R('1915-05-02', 'Gorlice'), R('1915-05-08', 'Jaslo'), R('1915-05-15', 'Jaroslaw'), R('1915-06-03', 'Przemysl'),
+          R('1915-06-22', 'Lemberg'), R('1915-07-18', 'Krasnystaw'), R('1915-08-01', 'Chelm'), R('1915-08-26', 'Brest'), R('1915-09-15', 'Kobryn')] },
+      { tag: 'GER', name: 'Army Group Mackensen in Serbia (German 11th Army)', type: 'infantry', men: 150000, exit: '1915-12-15',
+        route: [R('1915-10-06', 'Smederevo'), R('1915-10-20', 'Smederevo'), R('1915-11-01', 'Kragujevac'), R('1915-11-10', 'Krusevac'), R('1915-12-01', 'Krusevac')] },
+      { tag: 'GER', name: '9th Army (Falkenhayn) in Romania', type: 'infantry', men: 160000, exit: '1917-08-31',
+        route: [R('1916-09-20', 'Sibiu'), R('1916-09-29', 'Sibiu'), R('1916-10-09', 'Brasov'), R('1916-11-17', 'TarguJiu'), R('1916-11-21', 'Craiova'),
+          R('1916-12-03', 'Pitesti'), R('1916-12-06', 'Bucharest'), R('1916-12-20', 'Braila'), R('1917-01-08', 'Focsani'), R('1917-08-10', 'Marasesti')] },
+      { tag: 'GER', name: 'Danube Army (Kosch)', type: 'infantry', men: 90000, exit: '1917-03-01',
+        route: [R('1916-11-15', 'Svishtov'), R('1916-11-23', 'Svishtov'), R('1916-11-26', 'Bucharest'), R('1916-12-06', 'Bucharest'), R('1917-01-15', 'Braila')] },
+      { tag: 'GER', name: 'Army of the Bug and German troops for Ukraine (Linsingen)', type: 'infantry', men: 120000,
+        route: [R('1915-06-25', 'Lemberg'), R('1915-07-20', 'Krasnystaw'), R('1915-08-26', 'Brest'), R('1915-09-20', 'Kovel'), R('1917-12-15', 'Kovel'),
+          R('1918-02-18', 'Kovel'), R('1918-02-20', 'Lutsk'), R('1918-02-24', 'Zhytomyr'), R('1918-03-01', 'Kyiv'), R('1918-03-03', 'Kyiv')] },
+      // ============================================================ Austria-Hungary
+      { tag: 'AUS', name: '1st Army (Dankl)', type: 'infantry', men: 230000,
+        route: [R('1914-08-18', 'Rzeszow'), R('1914-08-25', 'Krasnik'), R('1914-09-05', 'Lublin'), R('1914-09-14', 'Rzeszow'), R('1914-10-05', 'Kielce'),
+          R('1914-10-20', 'Ivangorod'), R('1914-11-05', 'Krakow'), R('1915-05-20', 'Kielce'), R('1915-07-30', 'Lublin'), R('1915-08-30', 'Kovel'),
+          R('1915-09-15', 'Lutsk'), R('1916-06-01', 'Lutsk'), R('1916-06-10', 'Kovel'), R('1917-12-15', 'Kovel')] },
+      { tag: 'AUS', name: '4th Army (Auffenberg, then Archduke Joseph Ferdinand)', type: 'infantry', men: 250000,
+        route: [R('1914-08-20', 'Jaroslaw'), R('1914-08-28', 'Zamosc'), R('1914-09-01', 'Komarow'), R('1914-09-09', 'RawaRuska'), R('1914-09-14', 'Jaroslaw'),
+          R('1914-10-10', 'Przemysl'), R('1914-12-10', 'Tarnow'), R('1915-05-02', 'Tarnow'), R('1915-06-10', 'Jaroslaw'), R('1915-07-20', 'Zamosc'),
+          R('1915-08-30', 'Lutsk'), R('1915-09-30', 'Lutsk'), R('1916-06-05', 'Lutsk'), R('1916-06-12', 'Kovel'), R('1917-12-15', 'Kovel')] },
+      { tag: 'AUS', name: '3rd Army (Brudermann, then Boroevic)', type: 'infantry', men: 200000, exit: '1915-05-25',
+        route: [R('1914-08-20', 'Lemberg'), R('1914-08-26', 'Zloczow'), R('1914-08-31', 'Lemberg'), R('1914-09-08', 'Grodek'), R('1914-09-14', 'Sanok'),
+          R('1914-10-10', 'Przemysl'), R('1914-11-10', 'Sanok'), R('1915-01-25', 'Dukla'), R('1915-04-15', 'Sanok'), R('1915-05-15', 'Sanok')] },
+      { tag: 'AUS', name: '2nd Army (Bohm-Ermolli)', type: 'infantry', men: 180000,
+        route: [R('1914-09-01', 'Stryj'), R('1914-09-10', 'Grodek'), R('1914-09-15', 'Stryj'), R('1915-02-15', 'Stryj'), R('1915-06-22', 'Lemberg'),
+          R('1915-07-15', 'Zloczow'), R('1915-09-01', 'Brody'), R('1916-07-30', 'Brody'), R('1916-08-15', 'Zloczow'), R('1917-07-25', 'Tarnopol'),
+          R('1917-12-15', 'Tarnopol')] },
+      { tag: 'AUS', name: '7th Army (Pflanzer-Baltin)', type: 'infantry', men: 140000,
+        route: [R('1914-10-20', 'Stanislau'), R('1915-01-20', 'Kolomea'), R('1915-02-18', 'Czernowitz'), R('1916-06-10', 'Czernowitz'), R('1916-06-18', 'Kolomea'),
+          R('1916-08-10', 'Stanislau'), R('1917-07-30', 'Kolomea'), R('1917-08-03', 'Czernowitz'), R('1917-12-15', 'Czernowitz')] },
+      { tag: 'AUS', name: 'Balkan forces (Potiorek), from 1915 the 3rd Army (Kovess)', type: 'infantry', men: 190000, exit: '1915-12-20',
+        route: [R('1914-08-12', 'Sabac'), R('1914-08-17', 'Cer'), R('1914-08-24', 'Sabac'), R('1914-11-15', 'Valjevo'), R('1914-12-02', 'Belgrade'),
+          R('1914-12-15', 'Sabac'), R('1915-10-06', 'Belgrade'), R('1915-10-09', 'Belgrade'), R('1915-11-01', 'Kragujevac'), R('1915-12-01', 'Kragujevac')] },
+      // ============================================================ Russia
+      { tag: 'RUS', name: '1st Army (Rennenkampf)', type: 'infantry', men: 200000, exit: '1917-12-15',
+        route: [R('1914-08-15', 'Kovno'), R('1914-08-17', 'Stalluponen'), R('1914-08-20', 'Gumbinnen'), R('1914-08-24', 'Insterburg'), R('1914-08-30', 'Tapiau'),
+          R('1914-09-10', 'Insterburg'), R('1914-09-14', 'Gumbinnen'), R('1914-09-20', 'Kovno'), R('1914-10-20', 'Warsaw'), R('1914-11-20', 'Lowicz'),
+          R('1915-02-20', 'Przasnysz'), R('1915-07-24', 'Pultusk'), R('1915-08-20', 'Bielsk'), R('1915-09-15', 'Vilna'), R('1915-10-10', 'Postavy'),
+          R('1917-12-01', 'Postavy')] },
+      { tag: 'RUS', name: '2nd Army (Samsonov)', type: 'infantry', men: 190000, exit: '1914-08-31',
+        route: [R('1914-08-15', 'Mlawa'), R('1914-08-22', 'Soldau'), R('1914-08-24', 'Neidenburg'), R('1914-08-27', 'Hohenstein'), R('1914-08-30', 'Neidenburg')] },
+      { tag: 'RUS', name: '2nd Army (Scheidemann, later Smirnov)', type: 'infantry', men: 180000, exit: '1917-12-15',
+        route: [R('1914-10-10', 'Warsaw'), R('1914-11-14', 'Lodz'), R('1914-12-06', 'Lowicz'), R('1915-01-31', 'Bolimow'), R('1915-08-05', 'Warsaw'),
+          R('1915-08-25', 'Bialystok'), R('1915-09-20', 'Molodechno'), R('1916-03-18', 'Naroch'), R('1916-03-30', 'Naroch'), R('1917-12-01', 'Molodechno')] },
+      { tag: 'RUS', name: '10th Army (Sievers, then Radkevich)', type: 'infantry', men: 160000, exit: '1917-12-15',
+        route: [R('1914-09-20', 'Grodno'), R('1914-10-05', 'Augustow'), R('1914-11-15', 'Goldap'), R('1915-02-08', 'Goldap'), R('1915-02-15', 'Lyck'),
+          R('1915-02-22', 'Grodno'), R('1915-08-10', 'Kovno'), R('1915-08-24', 'Vilna'), R('1915-09-17', 'Vilna'), R('1915-09-25', 'Lida'), R('1915-10-15', 'Molodechno'),
+          R('1917-12-01', 'Molodechno')] },
+      { tag: 'RUS', name: '3rd Army (Ruzsky, then Radko-Dimitriev)', type: 'infantry', men: 220000, exit: '1917-12-15',
+        route: [R('1914-08-18', 'Dubno'), R('1914-08-26', 'Zloczow'), R('1914-09-03', 'Lemberg'), R('1914-09-20', 'Jaroslaw'), R('1914-11-20', 'Tarnow'),
+          R('1915-04-30', 'Gorlice'), R('1915-05-12', 'Sanok'), R('1915-06-05', 'Jaroslaw'), R('1915-07-20', 'Lublin'), R('1915-08-25', 'Kobryn'),
+          R('1915-10-01', 'Pinsk'), R('1917-12-01', 'Pinsk')] },
+      { tag: 'RUS', name: '8th Army (Brusilov, then Kaledin)', type: 'infantry', men: 210000, exit: '1917-12-15',
+        route: [R('1914-08-18', 'Proskurov'), R('1914-08-28', 'Halicz'), R('1914-09-04', 'Lemberg'), R('1914-09-25', 'Stryj'), R('1915-01-15', 'Dukla'),
+          R('1915-05-15', 'Sanok'), R('1915-06-25', 'Zloczow'), R('1915-09-15', 'Rovno'), R('1916-06-04', 'Rovno'), R('1916-06-07', 'Lutsk'),
+          R('1916-07-28', 'Kovel'), R('1917-07-01', 'Lutsk'), R('1917-12-01', 'Lutsk')] },
+      { tag: 'RUS', name: '9th Army (Lechitsky)', type: 'infantry', men: 170000, exit: '1917-12-15',
+        route: [R('1914-08-20', 'Lublin'), R('1914-10-15', 'Ivangorod'), R('1914-11-20', 'Kielce'), R('1915-01-20', 'Stanislau'), R('1915-05-01', 'Kolomea'),
+          R('1915-09-01', 'Proskurov'), R('1916-06-04', 'Proskurov'), R('1916-06-18', 'Czernowitz'), R('1916-08-10', 'Kolomea'), R('1916-11-01', 'Focsani'),
+          R('1917-08-10', 'Marasesti'), R('1917-12-01', 'Focsani')] },
+      { tag: 'RUS', name: '4th and 5th Armies (Evert, Plehve)', type: 'infantry', men: 250000, exit: '1917-12-15',
+        route: [R('1914-08-20', 'Krasnik'), R('1914-08-28', 'Komarow'), R('1914-09-12', 'Tomaszow'), R('1914-10-15', 'Ivangorod'), R('1914-11-15', 'Lodz'),
+          R('1915-07-15', 'Radom'), R('1915-08-04', 'Ivangorod'), R('1915-08-25', 'Brest'), R('1915-09-20', 'Baranovichi'), R('1916-07-03', 'Baranovichi'),
+          R('1917-12-01', 'Baranovichi')] },
+      { tag: 'RUS', name: '12th Army (Plehve, Gorbatovsky, Parsky)', type: 'infantry', men: 150000, exit: '1917-12-15',
+        route: [R('1915-05-01', 'Shavli'), R('1915-07-25', 'Mitau'), R('1915-08-25', 'Riga'), R('1915-10-01', 'Riga'), R('1917-09-01', 'Riga'),
+          R('1917-09-05', 'Wenden'), R('1917-12-01', 'Wenden')] },
+      { tag: 'RUS', name: '5th Army (Dvinsk)', type: 'infantry', men: 140000, exit: '1918-02-18',
+        route: [R('1915-09-01', 'Jakobstadt'), R('1915-09-20', 'Dvinsk'), R('1918-02-10', 'Dvinsk')] },
+      // ============================================================ Serbia, Bulgaria, Romania
+      { tag: 'SER', name: 'Serbian Army (Putnik)', type: 'infantry', men: 250000, exit: '1915-12-01',
+        route: [R('1914-08-12', 'Valjevo'), R('1914-08-17', 'Cer'), R('1914-08-25', 'Sabac'), R('1914-11-20', 'Kragujevac'), R('1914-12-08', 'Valjevo'),
+          R('1914-12-15', 'Belgrade'), R('1915-10-06', 'Belgrade'), R('1915-10-15', 'Kragujevac'), R('1915-11-05', 'Krusevac'), R('1915-11-25', 'Krusevac')] },
+      { tag: 'BUL', name: 'Bulgarian 1st Army (Boyadzhiev)', type: 'infantry', men: 190000, exit: '1915-12-31',
+        route: [R('1915-10-14', 'Vidin'), R('1915-10-25', 'Zajecar'), R('1915-11-05', 'Nis'), R('1915-12-01', 'Nis')] },
+      { tag: 'BUL', name: 'Bulgarian 3rd Army (Toshev)', type: 'infantry', men: 140000, exit: '1917-01-31',
+        route: [R('1916-09-01', 'Ruse'), R('1916-09-06', 'Tutrakan'), R('1916-10-22', 'Constanta'), R('1916-12-20', 'Braila')] },
+      { tag: 'ROM', name: 'Romanian 2nd Army (Averescu, then Crainiceanu)', type: 'infantry', men: 180000,
+        route: [R('1916-08-27', 'Ploiesti'), R('1916-08-30', 'Brasov'), R('1916-10-08', 'Brasov'), R('1916-10-25', 'Ploiesti'), R('1916-12-05', 'Bucharest'),
+          R('1916-12-20', 'Focsani'), R('1917-08-06', 'Marasesti'), R('1917-12-01', 'Marasesti')] },
+      { tag: 'ROM', name: 'Romanian 1st Army (Culcer)', type: 'infantry', men: 150000,
+        route: [R('1916-08-27', 'Severin'), R('1916-09-10', 'Sibiu'), R('1916-09-29', 'Sibiu'), R('1916-11-15', 'TarguJiu'), R('1916-11-25', 'Craiova'),
+          R('1916-12-03', 'Pitesti'), R('1916-12-25', 'Iasi'), R('1917-12-01', 'Iasi')] }
+    ],
+    forts: [
+      { name: 'Przemysl', at: at('Przemysl'), tag: 'AUS', men: 120000, from: '1914-11-09', until: '1915-03-22', to: 'RUS' },
+      { name: 'Ivangorod', at: at('Ivangorod'), tag: 'RUS', men: 20000, from: '1915-07-20', until: '1915-08-04', to: 'AUS' },
+      { name: 'Novogeorgievsk', at: at('Modlin'), tag: 'RUS', men: 90000, from: '1915-08-08', until: '1915-08-20', to: 'GER' },
+      { name: 'Kovno', at: at('Kovno'), tag: 'RUS', men: 90000, from: '1915-08-06', until: '1915-08-18', to: 'GER' },
+      { name: 'Osowiec', at: at('Osowiec'), tag: 'RUS', men: 15000, from: '1915-02-10', until: '1915-08-22', to: 'GER' },
+      { name: 'Brest-Litovsk', at: at('Brest'), tag: 'RUS', men: 30000, from: '1915-08-15', until: '1915-08-26', to: 'GER' },
+      { name: 'Grodno', at: at('Grodno'), tag: 'RUS', men: 25000, from: '1915-08-25', until: '1915-09-02', to: 'GER' }
+    ],
+    occupy: [
+      { date: '1914-09-03', by: 'RUS', at: [at('Lemberg'), at('Halicz')], note: 'Lemberg falls to the Russian 3rd Army' },
+      { date: '1914-09-15', by: 'RUS', at: [at('Czernowitz'), at('Stanislau')], note: 'the Russians occupy Bukovina and eastern Galicia' },
+      { date: '1914-12-02', by: 'AUS', at: [at('Belgrade')], note: 'the Austrians enter Belgrade' },
+      { date: '1914-12-15', by: 'SER', at: [at('Belgrade')], note: 'after the Kolubara, the Serbs retake Belgrade' },
+      { date: '1915-02-18', by: 'AUS', at: [at('Czernowitz')], note: 'Pflanzer-Baltin retakes Czernowitz' },
+      { date: '1915-05-08', by: 'GER', at: [at('Libau')], note: 'the Germans take Libau' },
+      { date: '1915-06-22', by: 'AUS', at: [at('Lemberg')], note: 'Lemberg is retaken' },
+      { date: '1915-07-30', by: 'AUS', at: [at('Lublin')], note: 'the Austrians enter Lublin' },
+      { date: '1915-08-01', by: 'GER', at: [at('Mitau')], note: 'the Germans take Mitau' },
+      { date: '1915-08-05', by: 'GER', at: [at('Warsaw')], note: 'German troops enter Warsaw' },
+      { date: '1915-09-19', by: 'GER', at: [at('Vilna')], note: 'the Germans enter Vilna' },
+      { date: '1915-10-09', by: 'AUS', at: [at('Belgrade')], note: 'Belgrade falls to Mackensen' },
+      { date: '1915-11-05', by: 'BUL', at: [at('Nis')], note: 'the Bulgarians take Nis' },
+      { date: '1916-06-18', by: 'RUS', at: [at('Czernowitz')], note: 'Brusilov\'s armies take Czernowitz' },
+      { date: '1916-12-06', by: 'GER', at: [at('Bucharest'), at('Ploiesti')], note: 'Mackensen rides into Bucharest' },
+      { date: '1917-08-03', by: 'AUS', at: [at('Czernowitz')], note: 'Czernowitz is Austrian again' },
+      { date: '1917-09-03', by: 'GER', at: [at('Riga')], note: 'Riga falls to Hutier\'s 8th Army' },
+      { date: '1918-02-18', by: 'GER', at: [at('Dvinsk')], note: 'the armistice ends; the Germans take Dvinsk without a fight' },
+      { date: '1918-02-21', by: 'GER', at: [at('Minsk')], note: 'German troops enter Minsk' },
+      { date: '1918-02-24', by: 'GER', at: [at('Pskov'), at('Dorpat')], note: 'Pskov and Dorpat are taken' },
+      { date: '1918-02-25', by: 'GER', at: [at('Reval')], note: 'the Germans enter Reval' },
+      { date: '1918-03-01', by: 'GER', at: [at('Kyiv'), at('Zhytomyr')], note: 'German troops enter Kyiv, invited by the Ukrainian People\'s Republic' }
+    ],
+    battles: [
+      { date: '1914-08-17', name: 'Stalluponen', at: at('Stalluponen'), won: 'a' },
+      { date: '1914-08-20', name: 'Gumbinnen', at: at('Gumbinnen'), won: 'b' },
+      { date: '1914-08-17', name: 'Cer', at: at('Cer'), won: 'b' },
+      { date: '1914-08-24', name: 'Krasnik', at: at('Krasnik'), won: 'a' },
+      { date: '1914-08-29', name: 'Tannenberg', at: at('Hohenstein'), won: 'a' },
+      { date: '1914-08-30', name: 'Gnila Lipa', at: at('Zloczow'), won: 'b' },
+      { date: '1914-09-01', name: 'Komarow', at: at('Komarow'), won: 'a' },
+      { date: '1914-09-08', name: 'Rawa Ruska', at: at('RawaRuska'), won: 'b' },
+      { date: '1914-09-10', name: 'the Masurian Lakes', at: at('Lotzen'), won: 'a' },
+      { date: '1914-10-05', name: 'Augustow', at: at('Augustow'), won: 'b' },
+      { date: '1914-10-18', name: 'the Vistula', at: at('Ivangorod'), won: 'b' },
+      { date: '1914-11-25', name: 'Lodz', at: at('Lodz'), won: 'a' },
+      { date: '1914-12-08', name: 'the Kolubara', at: at('Valjevo'), won: 'b' },
+      { date: '1915-02-18', name: 'the Winter Battle in Masuria', at: at('Augustow'), won: 'a' },
+      { date: '1915-02-26', name: 'Przasnysz', at: at('Przasnysz'), won: 'b' },
+      { date: '1915-05-03', name: 'Gorlice-Tarnow', at: at('Gorlice'), won: 'a' },
+      { date: '1915-06-03', name: 'Przemysl', at: at('Przemysl'), won: 'a' },
+      { date: '1915-07-15', name: 'Krasnystaw', at: at('Krasnystaw'), won: 'a' },
+      { date: '1915-07-24', name: 'the Narew', at: at('Pultusk'), won: 'a' },
+      { date: '1915-09-12', name: 'Vilna', at: at('Vilna'), won: 'a' },
+      { date: '1915-10-08', name: 'Belgrade', at: at('Belgrade'), won: 'a' },
+      { date: '1916-03-22', name: 'Lake Naroch', at: at('Naroch'), won: 'a' },
+      { date: '1916-06-07', name: 'Lutsk', at: at('Lutsk'), won: 'b' },
+      { date: '1916-06-17', name: 'Czernowitz', at: at('Czernowitz'), won: 'b' },
+      { date: '1916-07-28', name: 'the Stokhid', at: at('Kovel'), won: 'a' },
+      { date: '1916-09-06', name: 'Turtucaia', at: at('Tutrakan'), won: 'a' },
+      { date: '1916-09-28', name: 'Hermannstadt', at: at('Sibiu'), won: 'a' },
+      { date: '1916-10-08', name: 'Kronstadt', at: at('Brasov'), won: 'a' },
+      { date: '1916-12-02', name: 'the Arges', at: at('Bucharest'), won: 'a' },
+      { date: '1917-07-02', name: 'the Kerensky Offensive', at: at('Brzezany'), won: 'b' },
+      { date: '1917-07-22', name: 'Tarnopol', at: at('Tarnopol'), won: 'a' },
+      { date: '1917-08-12', name: 'Marasesti', at: at('Marasesti'), won: 'b' },
+      { date: '1917-09-02', name: 'Riga', at: at('Riga'), won: 'a' }
+    ],
+    // Brest-Litovsk ends the war in the east, not the occupation: German and Austrian troops stay until the armistice of 11 November
+    hold: [
+      { by: 'GER', at: [at('Warsaw'), at('Lodz'), at('Modlin'), at('Bialystok'), at('Grodno'), at('Brest'), at('Pinsk'), at('Baranovichi'), at('Lida'), at('Vilna'), at('Kovno'),
+        at('Libau'), at('Mitau'), at('Riga'), at('Wenden'), at('Dorpat'), at('Reval'), at('Dvinsk'), at('Minsk'), at('Pskov'), at('Kyiv'), at('Zhytomyr'), at('Lutsk'), at('Kovel'), at('Bucharest')],
+        until: '1918-11-11', note: 'the German armies of occupation stay in the east until the armistice' },
+      { by: 'AUS', at: [at('Lublin'), at('Kielce'), at('Radom'), at('Ivangorod'), at('Chelm'), at('Belgrade'), at('Kragujevac')], until: '1918-11-03',
+        note: 'Austria-Hungary keeps its zone of occupation until its own armistice' }
+    ],
+    attrition: [
+      { from: '1915-05-01', to: '1915-10-01', tags: ['RUS'], pct: 0.25 },   // the Great Retreat: a million men lost, most of them prisoners
+      { from: '1917-03-15', to: '1917-12-15', tags: ['RUS'], pct: 0.3 }     // desertion after the revolution
+    ]
+  });
+})();
+
+// ---------------------------------------------------------------- c1939.js
+// The invasion of Poland, 1 September to 6 October 1939, and the Soviet invasion from 17 September. German
+// army groups North (3rd and 4th Armies, Guderian's corps) and South (8th, 10th, 14th Armies), the Polish
+// armies of the September campaign, and the Soviet Belorussian and Ukrainian Fronts. The war ends after
+// the partition (the map's timelines hand the land to Germany and the Soviet Union on 6 and 26 October).
+(function () {
+  const P = {
+    Konigsberg: [54.71, 20.51], Allenstein: [53.78, 20.48], Neidenburg: [53.36, 20.43], Mlawa: [53.11, 20.38], Rozan: [52.88, 21.40], Pultusk: [52.70, 21.08],
+    Wizna: [53.20, 22.39], Lomza: [53.18, 22.06], Bialystok: [53.13, 23.16], Brest: [52.10, 23.70], Praga: [52.25, 21.04], Warsaw: [52.23, 21.01],
+    Modlin: [52.44, 20.70], Stolp: [54.46, 17.03], Tuchola: [53.59, 17.86], Bydgoszcz: [53.12, 18.01], Torun: [53.02, 18.60], Gdynia: [54.52, 18.53],
+    Hel: [54.61, 18.80], Danzig: [54.35, 18.65], Poznan: [52.41, 16.93], Kutno: [52.23, 19.36], Sochaczew: [52.23, 20.24], Lodz: [51.76, 19.46],
+    Kalisz: [51.76, 18.09], Oppeln: [50.67, 17.93], Czestochowa: [50.81, 19.12], Piotrkow: [51.41, 19.70], Radom: [51.40, 21.15], Krakow: [50.06, 19.94],
+    NowyTarg: [49.48, 20.03], Tarnow: [50.01, 20.99], Przemysl: [49.78, 22.77], Lwow: [49.84, 24.03], Tomaszow: [50.45, 23.42], Lublin: [51.25, 22.57],
+    Kock: [51.64, 22.45], Kielce: [50.87, 20.63], Grodno: [53.68, 23.83], Vilnius: [54.69, 25.28], Minsk: [53.90, 27.56], Molodechno: [54.31, 26.84],
+    Baranovichi: [53.13, 26.01], Polotsk: [55.49, 28.78], Lida: [53.89, 25.30], Shepetivka: [50.18, 27.06], Proskurov: [49.42, 26.99], Tarnopol: [49.55, 25.59],
+    Rovno: [50.62, 26.25], Lutsk: [50.75, 25.33], Kovel: [51.21, 24.71], Chelm: [51.14, 23.47], Bielsk: [52.77, 23.19], Volkovysk: [53.16, 24.45],
+    Kobryn: [52.21, 24.36], Mokra: [50.93, 18.86], Pinsk: [52.12, 26.10], Sambor: [49.52, 23.20], Stryj: [49.26, 23.85]
+  };
+  const R = (d, n) => [d, n, P[n][0], P[n][1]];
+  const at = n => P[n];
+
+  VY.CAMPAIGNS.push({
+    id: 'c1939', name: 'The Invasion of Poland',
+    start: '1939-09-01', end: '1939-10-27',
+    a: ['GER', 'SVK'], b: ['POL'],
+    join: [['1939-09-17', 'SOV', 'a']],
+    skip: { form: 'commonwealth' },   // a Poland united with Lithuania is invaded in the story (events_d)
+    title: [['1939-09-01', 'The September Campaign'], ['1939-10-07', 'The partition of Poland']],
+    fate: [['1939-09-01', 'a', 2.2], ['1939-09-17', 'a', 3.0]],
+    armies: [
+      // ============================================================ Germany and Slovakia
+      { tag: 'GER', name: '3rd Army (Kuchler)', type: 'infantry', men: 320000,
+        route: [R('1939-09-01', 'Neidenburg'), R('1939-09-03', 'Mlawa'), R('1939-09-06', 'Rozan'), R('1939-09-10', 'Pultusk'), R('1939-09-15', 'Praga'),
+          R('1939-09-28', 'Praga'), R('1939-10-05', 'Praga')] },
+      { tag: 'GER', name: 'XIX Panzer Corps (Guderian)', type: 'armor', men: 60000, exit: '1939-09-25',
+        route: [R('1939-09-01', 'Stolp'), R('1939-09-03', 'Tuchola'), R('1939-09-06', 'Konigsberg'), R('1939-09-09', 'Wizna'), R('1939-09-12', 'Bielsk'),
+          R('1939-09-16', 'Brest'), R('1939-09-22', 'Brest')] },
+      { tag: 'GER', name: '4th Army (Kluge)', type: 'infantry', men: 230000,
+        route: [R('1939-09-01', 'Stolp'), R('1939-09-04', 'Tuchola'), R('1939-09-06', 'Bydgoszcz'), R('1939-09-08', 'Torun'), R('1939-09-16', 'Kutno'),
+          R('1939-09-26', 'Modlin'), R('1939-09-29', 'Modlin'), R('1939-10-05', 'Modlin')] },
+      { tag: 'GER', name: '8th Army (Blaskowitz)', type: 'infantry', men: 180000,
+        route: [R('1939-09-01', 'Oppeln'), R('1939-09-04', 'Kalisz'), R('1939-09-09', 'Lodz'), R('1939-09-12', 'Kutno'), R('1939-09-18', 'Sochaczew'),
+          R('1939-09-26', 'Warsaw'), R('1939-09-30', 'Warsaw'), R('1939-10-05', 'Warsaw')] },
+      { tag: 'GER', name: '10th Army (Reichenau)', type: 'armor', men: 300000,
+        route: [R('1939-09-01', 'Oppeln'), R('1939-09-02', 'Mokra'), R('1939-09-03', 'Czestochowa'), R('1939-09-05', 'Piotrkow'), R('1939-09-08', 'Warsaw'),
+          R('1939-09-11', 'Radom'), R('1939-09-16', 'Sochaczew'), R('1939-09-25', 'Warsaw'), R('1939-10-05', 'Lublin')] },
+      { tag: 'GER', name: '14th Army (List)', type: 'infantry', men: 250000,
+        route: [R('1939-09-01', 'NowyTarg'), R('1939-09-06', 'Krakow'), R('1939-09-08', 'Tarnow'), R('1939-09-11', 'Przemysl'), R('1939-09-14', 'Sambor'),
+          R('1939-09-19', 'Lwow'), R('1939-09-21', 'Tomaszow'), R('1939-09-27', 'Przemysl'), R('1939-10-05', 'Przemysl')] },
+      { tag: 'SVK', name: 'Slovak Field Army Bernolak (Catlos)', type: 'infantry', men: 50000, exit: '1939-09-20',
+        route: [R('1939-09-01', 'NowyTarg'), R('1939-09-08', 'NowyTarg'), R('1939-09-15', 'NowyTarg')] },
+      // ============================================================ Poland
+      { tag: 'POL', name: 'Army Modlin (Przedrzymirski)', type: 'infantry', men: 90000, exit: '1939-09-29',
+        route: [R('1939-09-01', 'Mlawa'), R('1939-09-04', 'Pultusk'), R('1939-09-10', 'Modlin'), R('1939-09-28', 'Modlin')] },
+      { tag: 'POL', name: 'Army Pomorze (Bortnowski)', type: 'infantry', men: 140000, exit: '1939-09-19',
+        route: [R('1939-09-01', 'Tuchola'), R('1939-09-05', 'Torun'), R('1939-09-09', 'Kutno'), R('1939-09-15', 'Sochaczew'), R('1939-09-18', 'Sochaczew')] },
+      { tag: 'POL', name: 'Army Poznan (Kutrzeba)', type: 'infantry', men: 110000, exit: '1939-09-20',
+        route: [R('1939-09-01', 'Poznan'), R('1939-09-06', 'Poznan'), R('1939-09-09', 'Kutno'), R('1939-09-12', 'Lodz'), R('1939-09-16', 'Sochaczew'),
+          R('1939-09-19', 'Sochaczew')] },
+      { tag: 'POL', name: 'Army Lodz (Rommel) and the defence of Warsaw', type: 'infantry', men: 140000, exit: '1939-09-29',
+        route: [R('1939-09-01', 'Kalisz'), R('1939-09-02', 'Mokra'), R('1939-09-05', 'Lodz'), R('1939-09-08', 'Warsaw'), R('1939-09-28', 'Warsaw')] },
+      { tag: 'POL', name: 'Army Prusy (Dab-Biernacki)', type: 'infantry', men: 120000, exit: '1939-09-13',
+        route: [R('1939-09-01', 'Piotrkow'), R('1939-09-06', 'Piotrkow'), R('1939-09-09', 'Radom'), R('1939-09-12', 'Radom')] },
+      { tag: 'POL', name: 'Army Krakow (Szylling), then the Northern Front', type: 'infantry', men: 120000, exit: '1939-09-27',
+        route: [R('1939-09-01', 'Krakow'), R('1939-09-06', 'Tarnow'), R('1939-09-12', 'Kielce'), R('1939-09-17', 'Lublin'), R('1939-09-22', 'Tomaszow'),
+          R('1939-09-26', 'Tomaszow')] },
+      { tag: 'POL', name: 'Army Karpaty and the defence of Lwow (Sosnkowski, Langner)', type: 'infantry', men: 80000, exit: '1939-09-23',
+        route: [R('1939-09-01', 'Tarnow'), R('1939-09-08', 'Przemysl'), R('1939-09-14', 'Lwow'), R('1939-09-22', 'Lwow')] },
+      { tag: 'POL', name: 'Operational Group Narew (Mlot-Fijalkowski)', type: 'infantry', men: 60000, exit: '1939-09-25',
+        route: [R('1939-09-01', 'Lomza'), R('1939-09-07', 'Wizna'), R('1939-09-12', 'Bialystok'), R('1939-09-20', 'Grodno'), R('1939-09-24', 'Grodno')] },
+      { tag: 'POL', name: 'Independent Operational Group Polesie (Kleeberg)', type: 'infantry', men: 18000, exit: '1939-10-06',
+        route: [R('1939-09-10', 'Kobryn'), R('1939-09-20', 'Brest'), R('1939-09-28', 'Kock'), R('1939-10-05', 'Kock')] },
+      // ============================================================ the Soviet Union, from 17 September
+      { tag: 'SOV', name: 'Belorussian Front (Kovalyov)', type: 'armor', men: 380000,
+        route: [R('1939-09-17', 'Molodechno'), R('1939-09-19', 'Vilnius'), R('1939-09-21', 'Grodno'), R('1939-09-22', 'Bialystok'), R('1939-09-25', 'Brest'),
+          R('1939-10-05', 'Bialystok')] },
+      { tag: 'SOV', name: 'Belorussian Front: southern group', type: 'infantry', men: 200000,
+        route: [R('1939-09-17', 'Baranovichi'), R('1939-09-20', 'Volkovysk'), R('1939-09-24', 'Kobryn'), R('1939-10-05', 'Pinsk')] },
+      { tag: 'SOV', name: 'Ukrainian Front (Timoshenko)', type: 'armor', men: 400000,
+        route: [R('1939-09-17', 'Proskurov'), R('1939-09-18', 'Tarnopol'), R('1939-09-20', 'Lwow'), R('1939-09-22', 'Lwow'), R('1939-09-27', 'Rovno'),
+          R('1939-10-05', 'Lutsk')] }
+    ],
+    forts: [
+      { name: 'Westerplatte', at: [54.41, 18.67], tag: 'POL', men: 200, until: '1939-09-07', to: 'GER' },
+      { name: 'Warsaw', at: at('Warsaw'), tag: 'POL', men: 120000, from: '1939-09-08', until: '1939-09-28', to: 'GER' },
+      { name: 'Modlin', at: at('Modlin'), tag: 'POL', men: 35000, from: '1939-09-13', until: '1939-09-29', to: 'GER' },
+      { name: 'Hel', at: at('Hel'), tag: 'POL', men: 3000, until: '1939-10-02', to: 'GER' },
+      { name: 'Lwow', at: at('Lwow'), tag: 'POL', men: 30000, from: '1939-09-12', until: '1939-09-22', to: 'SOV' }
+    ],
+    occupy: [
+      { date: '1939-09-05', by: 'GER', at: [at('Bydgoszcz'), at('Danzig')], note: 'the Germans take Bydgoszcz; Danzig is annexed to the Reich' },
+      { date: '1939-09-06', by: 'GER', at: [at('Krakow')], note: 'German troops enter Krakow' },
+      { date: '1939-09-09', by: 'GER', at: [at('Lodz')], note: 'Lodz is taken' },
+      { date: '1939-09-14', by: 'GER', at: [at('Gdynia')], note: 'Gdynia falls' },
+      { date: '1939-09-19', by: 'SOV', at: [at('Vilnius')], note: 'Soviet tanks enter Vilnius' },
+      { date: '1939-09-22', by: 'SOV', at: [at('Grodno'), at('Bialystok'), at('Brest')], note: 'the Red Army takes Grodno; Brest is handed to the Soviets after a joint parade' },
+      { date: '1939-10-06', by: 'GER', at: [at('Kock'), at('Lublin')], note: 'Kleeberg surrenders at Kock: the last Polish field force lays down its arms' }
+    ],
+    battles: [
+      { date: '1939-09-01', name: 'Mokra', at: at('Mokra'), won: 'b' },
+      { date: '1939-09-03', name: 'Mlawa', at: at('Mlawa'), won: 'a' },
+      { date: '1939-09-04', name: 'the Tuchola Forest', at: at('Tuchola'), won: 'a' },
+      { date: '1939-09-09', name: 'Wizna', at: at('Wizna'), won: 'a' },
+      { date: '1939-09-11', name: 'Radom', at: at('Radom'), won: 'a' },
+      { date: '1939-09-16', name: 'the Bzura', at: at('Sochaczew'), won: 'a' },
+      { date: '1939-09-21', name: 'Grodno', at: at('Grodno'), won: 'a' },
+      { date: '1939-09-24', name: 'Tomaszow Lubelski', at: at('Tomaszow'), won: 'a' },
+      { date: '1939-10-04', name: 'Kock', at: at('Kock'), won: 'a' }
+    ]
+  });
+})();
+
+// ---------------------------------------------------------------- c1941.js
+// The war in the east, 22 June 1941 to 9 May 1945: Barbarossa, Leningrad, Moscow, Sevastopol, Kharkiv and
+// Voronezh, Kursk, the Dnieper, Bagration and the Baltic offensive, Iasi-Kishinev, Budapest, East Prussia,
+// the Vistula-Oder offensive and Berlin. The units are German armies and panzer groups and Soviet fronts
+// (one unit each, with their strength at the time); Stalingrad and the Caucasus lie beyond the map's east
+// and south edges, so armies leave the map there. Positions after Glantz and House, When Titans Clashed, and
+// the German and Soviet operational histories. The occupation of whole districts is also in js/data/world2.js.
+(function () {
+  const P = {
+    Tilsit: [55.08, 21.88], Memel: [55.71, 21.13], Siauliai: [55.93, 23.31], Raseiniai: [55.38, 23.12], Kaunas: [54.90, 23.90], Vilnius: [54.69, 25.28],
+    Alytus: [54.40, 24.05], Suwalki: [54.10, 22.93], Daugavpils: [55.87, 26.54], Rezekne: [56.51, 27.33], Riga: [56.95, 24.11], Jelgava: [56.65, 23.72],
+    Tukums: [56.97, 23.15], Saldus: [56.66, 22.49], Liepaja: [56.51, 21.01], Palanga: [55.92, 21.07], Madona: [56.85, 26.22], Valga: [57.78, 26.05],
+    Parnu: [58.38, 24.50], Tallinn: [59.44, 24.75], Narva: [59.38, 28.19], Ostrov: [57.34, 28.35], Pskov: [57.82, 28.33], Opochka: [56.71, 28.67],
+    Luga: [58.74, 29.85], Gatchina: [59.57, 30.13], Pushkin: [59.72, 30.41], Leningrad: [59.94, 30.31], Shlisselburg: [59.95, 31.03], Oranienbaum: [59.92, 29.77],
+    Novgorod: [58.52, 31.27], Soltsy: [58.12, 30.32], StarayaRussa: [57.99, 31.36], Demyansk: [57.64, 32.47], Valdai: [57.98, 33.24], Kholm: [57.15, 31.18],
+    VelikiyeLuki: [56.34, 30.53], Nevel: [56.02, 29.92], Toropets: [56.50, 31.63], Polotsk: [55.49, 28.78], Vitebsk: [55.19, 30.20], Orsha: [54.51, 30.42],
+    Smolensk: [54.78, 32.05], Yartsevo: [55.06, 32.69], Yelnya: [54.57, 33.17], Roslavl: [53.95, 32.86], Vyazma: [55.21, 34.30], Rzhev: [56.26, 34.33],
+    Kalinin: [56.86, 35.90], Klin: [56.33, 36.73], Yakhroma: [56.29, 37.48], Khimki: [55.89, 37.44], Moscow: [55.75, 37.62], Mozhaisk: [55.51, 36.02],
+    NaroFominsk: [55.39, 36.73], Yukhnov: [54.75, 35.24], Kaluga: [54.51, 36.25], Tula: [54.19, 37.62], Bryansk: [53.25, 34.37], Oryol: [52.97, 36.06],
+    Ponyri: [52.30, 36.29], Kursk: [51.73, 36.19], Prokhorovka: [51.04, 36.73], Belgorod: [50.60, 36.60], Kharkiv: [49.99, 36.23], Valuyki: [50.21, 38.10],
+    Voronezh: [51.67, 39.20], Korotoyak: [51.00, 39.05], Poltava: [49.59, 34.55], Kremenchuk: [49.07, 33.42], Lokhvytsia: [50.36, 33.26], Konotop: [51.24, 33.20],
+    Chernihiv: [51.49, 31.29], Gomel: [52.43, 31.00], Rogachev: [53.09, 30.05], Babruysk: [53.14, 29.22], Mogilev: [53.90, 30.33], Minsk: [53.90, 27.56],
+    Borisov: [54.23, 28.50], Molodechno: [54.31, 26.84], Lida: [53.89, 25.30], Navahrudak: [53.60, 25.83], Grodno: [53.68, 23.83], Bialystok: [53.13, 23.16],
+    Brest: [52.10, 23.70], Slonim: [53.09, 25.32], Baranovichi: [53.13, 26.01], Pinsk: [52.12, 26.10], Kovel: [51.21, 24.71], Lutsk: [50.75, 25.33],
+    Dubno: [50.42, 25.73], Rovno: [50.62, 26.25], Sokal: [50.48, 24.28], Lviv: [49.84, 24.03], Przemysl: [49.78, 22.77], Tarnopol: [49.55, 25.59],
+    Proskurov: [49.42, 26.99], Buchach: [49.06, 25.39], Kamianets: [48.68, 26.58], Stanislau: [48.92, 24.71], Zhytomyr: [50.25, 28.66], Berdychiv: [49.90, 28.58],
+    Vinnytsia: [49.23, 28.47], Uman: [48.75, 30.22], Kyiv: [50.45, 30.52], Fastiv: [50.08, 29.92], Korsun: [49.42, 31.27], Cherkasy: [49.44, 32.06],
+    Kirovohrad: [48.51, 32.26], Dnipro: [48.46, 35.04], Zaporizhzhia: [47.84, 35.14], Nikopol: [47.57, 34.40], Melitopol: [46.84, 35.37], Mariupol: [47.10, 37.55],
+    Stalino: [48.00, 37.80], Mykolaiv: [46.97, 32.00], Kherson: [46.64, 32.61], Odesa: [46.48, 30.73], Perekop: [46.16, 33.69], Simferopol: [44.95, 34.10],
+    Sevastopol: [44.62, 33.53], Kerch: [45.36, 36.47], Iasi: [47.16, 27.59], Chisinau: [47.01, 28.86], Balti: [47.76, 27.93], Bucharest: [44.43, 26.10],
+    Ruse: [43.85, 25.97], Belgrade: [44.80, 20.47], Debrecen: [47.53, 21.63], Budapest: [47.50, 19.04], Szekesfehervar: [47.19, 18.41], Vienna: [48.21, 16.37],
+    Bratislava: [48.15, 17.11], Brno: [49.20, 16.61], Olomouc: [49.59, 17.25], Ostrava: [49.83, 18.28], Uzhhorod: [48.62, 22.30], Linz: [48.31, 14.29],
+    Lublin: [51.25, 22.57], Praga: [52.25, 21.04], Warsaw: [52.23, 21.01], Sandomierz: [50.68, 21.75], Kielce: [50.87, 20.63], Krakow: [50.06, 19.94],
+    Lomza: [53.18, 22.06], Rozan: [52.88, 21.40], Elbing: [54.16, 19.40], Danzig: [54.35, 18.65], Stettin: [53.43, 14.55], Wismar: [53.89, 11.46],
+    Gumbinnen: [54.59, 22.20], Insterburg: [54.63, 21.81], Konigsberg: [54.71, 20.51], Heiligenbeil: [54.39, 20.04], Pillau: [54.65, 19.90],
+    Vilkaviskis: [54.65, 23.03], Breslau: [51.11, 17.03], Kustrin: [52.57, 14.63], Seelow: [52.53, 14.38], Berlin: [52.52, 13.40], Halbe: [52.11, 13.70],
+    Cottbus: [51.76, 14.33], Dresden: [51.05, 13.74], Torgau: [51.56, 13.00], Prague: [50.08, 14.42], Prenzlau: [53.32, 13.86], Stralsund: [54.31, 13.08]
+  };
+  const R = (d, n) => [d, n, P[n][0], P[n][1]];
+  const at = n => P[n];
+  // the German east and Poland are held by the Red Army after the capitulation, until the Potsdam
+  // settlement (and the Soviet zone of Germany until the GDR is founded)
+  const EAST = ['Konigsberg', 'Insterburg', 'Gumbinnen', 'Tilsit', 'Memel', 'Heiligenbeil', 'Elbing', 'Danzig', 'Stettin', 'Breslau', 'Warsaw', 'Krakow', 'Lomza', 'Bialystok', 'Suwalki'];
+  const ZONE = ['Berlin', 'Dresden', 'Cottbus', 'Halbe', 'Prenzlau', 'Stralsund'];
+
+  VY.CAMPAIGNS.push({
+    id: 'c1941', name: 'The War in the East',
+    start: '1941-06-22', end: '1945-05-09',
+    a: ['GER', 'ROM'], b: ['SOV'],
+    join: [['1941-06-23', 'SVK', 'a'], ['1941-06-25', 'FIN', 'a'], ['1941-06-27', 'HUN', 'a']],
+    leave: [['1944-08-23', 'ROM'], ['1944-09-19', 'FIN']],
+    // after Romania changed sides (23 August 1944) and Bulgaria was overrun (September 1944) the Red Army marched through them
+    pass: ['ROM', 'BUL', 'YUG', 'SER'],
+    title: [['1941-06-22', 'Operation Barbarossa'], ['1941-12-05', 'The Eastern Front'], ['1943-07-05', 'The Eastern Front: Kursk'],
+      ['1944-06-22', 'The Eastern Front: Operation Bagration'], ['1945-01-12', 'The Eastern Front: the road to Berlin']],
+    fate: [
+      ['1941-06-22', 'a', 2.2],    // surprise, the Red Army caught in its forward positions
+      ['1941-12-05', 'b', 1.4],    // the winter counteroffensive before Moscow
+      ['1942-05-01', 'a', 1.5],    // Kharkiv, Kerch, Sevastopol, the drive to the Don and the Volga
+      ['1942-11-19', 'b', 1.3],    // Stalingrad (off the map) and the Soviet winter offensive
+      ['1943-02-20', 'a', 1.3],    // Manstein's counterstroke, Kharkiv retaken
+      ['1943-07-12', 'b', 1.6],    // after Kursk the initiative is Soviet for good
+      ['1944-06-22', 'b', 2.4],    // Bagration
+      ['1945-01-12', 'b', 2.6]     // Vistula-Oder to Berlin
+    ],
+    armies: [
+      // ============================================================ Army Group North
+      { tag: 'GER', name: '18th Army (Kuchler, then Lindemann)', type: 'infantry', men: 250000,
+        route: [R('1941-06-22', 'Tilsit'), R('1941-06-26', 'Siauliai'), R('1941-07-01', 'Riga'), R('1941-07-15', 'Parnu'), R('1941-08-28', 'Tallinn'),
+          R('1941-09-10', 'Gatchina'), R('1941-09-25', 'Pushkin'), R('1943-01-18', 'Pushkin'), R('1944-01-20', 'Gatchina'), R('1944-01-30', 'Luga'),
+          R('1944-03-01', 'Pskov'), R('1944-07-23', 'Pskov'), R('1944-08-20', 'Valga'), R('1944-09-25', 'Riga'), R('1944-10-13', 'Tukums'),
+          R('1945-05-09', 'Saldus')] },
+      { tag: 'GER', name: '16th Army (Busch, then Hansen)', type: 'infantry', men: 220000,
+        route: [R('1941-06-22', 'Tilsit'), R('1941-06-24', 'Kaunas'), R('1941-06-28', 'Daugavpils'), R('1941-07-10', 'Opochka'), R('1941-08-10', 'StarayaRussa'),
+          R('1941-09-15', 'Demyansk'), R('1943-02-28', 'Demyansk'), R('1943-03-10', 'StarayaRussa'), R('1944-02-20', 'StarayaRussa'), R('1944-03-01', 'Opochka'),
+          R('1944-07-15', 'Opochka'), R('1944-07-27', 'Rezekne'), R('1944-09-20', 'Jelgava'), R('1944-10-15', 'Saldus'), R('1945-05-09', 'Liepaja')] },
+      { tag: 'GER', name: '4th Panzer Group (Hoepner), from 1942 the 4th Panzer Army (Hoth, Raus)', type: 'armor', men: 160000,
+        route: [R('1941-06-22', 'Tilsit'), R('1941-06-25', 'Raseiniai'), R('1941-06-26', 'Daugavpils'), R('1941-07-09', 'Pskov'), R('1941-07-15', 'Luga'),
+          R('1941-09-08', 'Gatchina'), R('1941-09-25', 'Gatchina'), R('1941-10-07', 'Vyazma'), R('1941-10-20', 'Mozhaisk'), R('1941-11-30', 'Khimki'),
+          R('1941-12-12', 'Mozhaisk'), R('1942-01-20', 'Rzhev'), R('1942-06-28', 'Kursk'), R('1942-07-07', 'Voronezh'), R('1942-08-01', 'Valuyki'),
+          R('1943-02-20', 'Dnipro'), R('1943-03-14', 'Kharkiv'), R('1943-07-05', 'Belgorod'), R('1943-07-12', 'Prokhorovka'), R('1943-08-23', 'Poltava'),
+          R('1943-09-25', 'Kyiv'), R('1943-11-06', 'Fastiv'), R('1943-11-19', 'Zhytomyr'), R('1943-12-31', 'Berdychiv'), R('1944-04-15', 'Kovel'),
+          R('1944-07-22', 'Lublin'), R('1944-08-15', 'Sandomierz'), R('1945-01-14', 'Kielce'), R('1945-02-15', 'Breslau'), R('1945-04-20', 'Cottbus'),
+          R('1945-05-08', 'Dresden')] },
+      // ============================================================ Army Group Centre
+      { tag: 'GER', name: '3rd Panzer Group (Hoth), from 1942 the 3rd Panzer Army (Reinhardt, Raus)', type: 'armor', men: 150000,
+        route: [R('1941-06-22', 'Suwalki'), R('1941-06-23', 'Alytus'), R('1941-06-24', 'Vilnius'), R('1941-06-26', 'Molodechno'), R('1941-06-28', 'Minsk'),
+          R('1941-07-09', 'Vitebsk'), R('1941-07-20', 'Yartsevo'), R('1941-08-25', 'VelikiyeLuki'), R('1941-10-07', 'Vyazma'), R('1941-10-14', 'Kalinin'),
+          R('1941-11-23', 'Klin'), R('1941-11-28', 'Yakhroma'), R('1941-12-15', 'Klin'), R('1942-01-25', 'Vitebsk'), R('1944-06-22', 'Vitebsk'),
+          R('1944-06-27', 'Polotsk'), R('1944-07-10', 'Kaunas'), R('1944-07-28', 'Siauliai'), R('1944-08-20', 'Siauliai'), R('1944-10-08', 'Memel'),
+          R('1944-10-20', 'Tilsit'), R('1945-01-20', 'Insterburg'), R('1945-01-30', 'Konigsberg'), R('1945-03-10', 'Stettin'), R('1945-05-02', 'Prenzlau')] },
+      { tag: 'GER', name: '9th Army (Strauss, then Model, Busse)', type: 'infantry', men: 260000,
+        route: [R('1941-06-22', 'Suwalki'), R('1941-06-24', 'Grodno'), R('1941-06-30', 'Navahrudak'), R('1941-07-10', 'Minsk'), R('1941-07-20', 'Polotsk'),
+          R('1941-08-30', 'Toropets'), R('1941-10-07', 'Vyazma'), R('1941-10-14', 'Rzhev'), R('1941-10-25', 'Kalinin'), R('1941-12-20', 'Rzhev'),
+          R('1943-03-10', 'Rzhev'), R('1943-03-25', 'Vyazma'), R('1943-07-05', 'Oryol'), R('1943-07-08', 'Ponyri'), R('1943-08-05', 'Oryol'),
+          R('1943-09-20', 'Bryansk'), R('1943-11-26', 'Gomel'), R('1944-06-22', 'Babruysk'), R('1944-06-29', 'Babruysk'), R('1944-08-01', 'Warsaw'),
+          R('1945-01-17', 'Warsaw'), R('1945-02-10', 'Kustrin'), R('1945-04-16', 'Seelow'), R('1945-04-28', 'Halbe')] },
+      { tag: 'GER', name: '4th Army (Kluge, then Heinrici, Tippelskirch, Hossbach)', type: 'infantry', men: 260000, exit: '1945-03-30',
+        route: [R('1941-06-22', 'Brest'), R('1941-06-27', 'Slonim'), R('1941-07-08', 'Minsk'), R('1941-07-20', 'Mogilev'), R('1941-08-05', 'Smolensk'),
+          R('1941-09-30', 'Roslavl'), R('1941-10-07', 'Vyazma'), R('1941-10-25', 'Mozhaisk'), R('1941-11-30', 'NaroFominsk'), R('1942-01-20', 'Yukhnov'),
+          R('1943-03-01', 'Yukhnov'), R('1943-03-23', 'Vyazma'), R('1943-09-25', 'Smolensk'), R('1943-10-15', 'Orsha'), R('1944-06-22', 'Orsha'),
+          R('1944-06-28', 'Mogilev'), R('1944-07-03', 'Minsk'), R('1944-07-20', 'Grodno'), R('1944-10-20', 'Gumbinnen'), R('1945-01-22', 'Insterburg'),
+          R('1945-02-10', 'Heiligenbeil'), R('1945-03-29', 'Heiligenbeil')] },
+      { tag: 'GER', name: '2nd Panzer Group (Guderian), from 1942 the 2nd Panzer Army', type: 'armor', men: 160000, exit: '1943-08-31',
+        route: [R('1941-06-22', 'Brest'), R('1941-06-27', 'Baranovichi'), R('1941-07-04', 'Babruysk'), R('1941-07-16', 'Smolensk'), R('1941-08-08', 'Roslavl'),
+          R('1941-09-10', 'Konotop'), R('1941-09-15', 'Lokhvytsia'), R('1941-10-03', 'Oryol'), R('1941-11-20', 'Tula'), R('1941-12-10', 'Tula'),
+          R('1942-01-20', 'Oryol'), R('1943-07-12', 'Oryol'), R('1943-08-05', 'Oryol'), R('1943-08-20', 'Bryansk')] },
+      // ============================================================ Army Group South
+      { tag: 'GER', name: '6th Army (Reichenau, then Paulus)', type: 'infantry', men: 270000, exit: '1942-08-10',
+        route: [R('1941-06-22', 'Sokal'), R('1941-06-28', 'Lutsk'), R('1941-07-15', 'Zhytomyr'), R('1941-08-20', 'Fastiv'), R('1941-09-19', 'Kyiv'),
+          R('1941-10-24', 'Kharkiv'), R('1942-05-20', 'Kharkiv'), R('1942-07-10', 'Valuyki'), R('1942-08-05', 'Valuyki')] },
+      { tag: 'GER', name: '1st Panzer Group (Kleist), from 1942 the 1st Panzer Army (Hube)', type: 'armor', men: 160000,
+        route: [R('1941-06-22', 'Sokal'), R('1941-06-30', 'Dubno'), R('1941-07-10', 'Zhytomyr'), R('1941-08-03', 'Uman'), R('1941-08-25', 'Dnipro'),
+          R('1941-09-15', 'Kremenchuk'), R('1941-09-20', 'Lokhvytsia'), R('1941-10-10', 'Mariupol'), R('1942-07-20', 'Mariupol'), R('1942-07-30', 'Mariupol'),
+          R('1943-02-20', 'Stalino'), R('1943-09-10', 'Zaporizhzhia'), R('1943-12-20', 'Kirovohrad'), R('1944-02-10', 'Korsun'), R('1944-03-25', 'Kamianets'),
+          R('1944-04-10', 'Buchach'), R('1944-07-20', 'Stanislau'), R('1944-10-01', 'Uzhhorod'), R('1945-03-15', 'Ostrava'), R('1945-05-08', 'Olomouc')] },
+      { tag: 'GER', name: '17th Army (Stulpnagel, Ruoff, then Jaenecke)', type: 'infantry', men: 200000,
+        route: [R('1941-06-22', 'Przemysl'), R('1941-06-30', 'Lviv'), R('1941-07-20', 'Vinnytsia'), R('1941-08-03', 'Uman'), R('1941-09-15', 'Kremenchuk'),
+          R('1941-10-25', 'Poltava'), R('1942-07-10', 'Stalino'), R('1942-07-28', 'Mariupol'), R('1943-10-10', 'Kerch'), R('1944-04-15', 'Simferopol'),
+          R('1944-05-09', 'Sevastopol')] },
+      { tag: 'GER', name: '11th Army (Schobert, then Manstein)', type: 'infantry', men: 180000, exit: '1942-08-01',
+        route: [R('1941-07-02', 'Iasi'), R('1941-07-16', 'Balti'), R('1941-08-16', 'Mykolaiv'), R('1941-09-12', 'Kherson'), R('1941-09-26', 'Perekop'),
+          R('1941-11-01', 'Simferopol'), R('1941-11-16', 'Kerch'), R('1941-12-17', 'Sevastopol'), R('1942-05-15', 'Kerch'), R('1942-06-07', 'Sevastopol'),
+          R('1942-07-04', 'Sevastopol')] },
+      { tag: 'ROM', name: 'Romanian 4th Army (Ciuperca)', type: 'infantry', men: 160000, exit: '1942-07-01',
+        route: [R('1941-07-02', 'Iasi'), R('1941-07-16', 'Chisinau'), R('1941-08-15', 'Odesa'), R('1941-10-16', 'Odesa'), R('1942-06-01', 'Odesa')] },
+      { tag: 'GER', name: '8th Army (Wohler) and the 6th Army in the south, 1943-1945', type: 'infantry', men: 250000,
+        route: [R('1943-08-25', 'Kharkiv'), R('1943-09-29', 'Kremenchuk'), R('1943-12-14', 'Cherkasy'), R('1944-01-08', 'Kirovohrad'), R('1944-02-17', 'Korsun'),
+          R('1944-03-15', 'Uman'), R('1944-04-10', 'Iasi'), R('1944-08-20', 'Iasi'), R('1944-08-25', 'Chisinau'), R('1944-10-15', 'Debrecen'),
+          R('1944-12-26', 'Budapest'), R('1945-02-13', 'Budapest'), R('1945-03-15', 'Szekesfehervar'), R('1945-04-13', 'Vienna'), R('1945-05-08', 'Linz')] },
+      { tag: 'HUN', name: 'Hungarian 2nd Army (Jany)', type: 'infantry', men: 200000, exit: '1943-02-01',
+        route: [R('1942-07-01', 'Kursk'), R('1942-07-07', 'Voronezh'), R('1942-08-01', 'Korotoyak'), R('1943-01-13', 'Korotoyak'), R('1943-01-25', 'Valuyki')] },
+      // ============================================================ the Red Army: the north
+      { tag: 'SOV', name: 'Northwestern Front (Kuznetsov, Kurochkin), from 1943 the 2nd Baltic Front (Popov, Yeryomenko)', type: 'infantry', men: 350000,
+        route: [R('1941-06-22', 'Siauliai'), R('1941-06-23', 'Kaunas'), R('1941-06-26', 'Raseiniai'), R('1941-06-29', 'Daugavpils'), R('1941-07-05', 'Ostrov'),
+          R('1941-07-15', 'StarayaRussa'), R('1941-08-14', 'Soltsy'), R('1941-09-01', 'Valdai'), R('1942-02-08', 'Demyansk'), R('1943-03-01', 'StarayaRussa'),
+          R('1943-12-01', 'Kholm'), R('1944-03-01', 'Opochka'), R('1944-07-27', 'Rezekne'), R('1944-08-10', 'Madona'), R('1944-09-20', 'Valga'),
+          R('1944-10-13', 'Riga'), R('1945-02-01', 'Saldus'), R('1945-05-09', 'Saldus')] },
+      { tag: 'SOV', name: 'Northern Front, from August 1941 the Leningrad Front (Popov, Zhukov, Govorov)', type: 'infantry', men: 300000,
+        route: [R('1941-06-22', 'Tallinn'), R('1941-07-15', 'Luga'), R('1941-08-20', 'Gatchina'), R('1941-09-08', 'Leningrad'), R('1943-01-12', 'Leningrad'),
+          R('1943-01-18', 'Shlisselburg'), R('1944-01-14', 'Oranienbaum'), R('1944-01-27', 'Gatchina'), R('1944-02-15', 'Narva'), R('1944-07-26', 'Narva'),
+          R('1944-09-22', 'Tallinn'), R('1944-10-10', 'Parnu')] },
+      { tag: 'SOV', name: 'Kalinin Front (Konev), from 1943 the 1st Baltic Front (Yeryomenko, Bagramyan)', type: 'infantry', men: 400000,
+        route: [R('1941-10-17', 'Klin'), R('1941-12-16', 'Kalinin'), R('1942-01-20', 'Toropets'), R('1942-12-01', 'VelikiyeLuki'), R('1943-01-17', 'VelikiyeLuki'),
+          R('1943-10-06', 'Nevel'), R('1944-06-23', 'Vitebsk'), R('1944-07-04', 'Polotsk'), R('1944-07-27', 'Siauliai'), R('1944-07-31', 'Tukums'),
+          R('1944-08-20', 'Siauliai'), R('1944-10-10', 'Palanga'), R('1944-10-20', 'Memel'), R('1945-01-28', 'Memel'), R('1945-03-01', 'Saldus'),
+          R('1945-05-09', 'Saldus')] },
+      // ============================================================ the Red Army: the centre
+      { tag: 'SOV', name: 'Western Front (Pavlov): 3rd, 4th and 10th Armies', type: 'infantry', men: 600000, exit: '1941-07-09',
+        route: [R('1941-06-22', 'Bialystok'), R('1941-06-25', 'Grodno'), R('1941-06-28', 'Navahrudak'), R('1941-07-03', 'Minsk'), R('1941-07-08', 'Minsk')] },
+      { tag: 'SOV', name: 'Western Front (Timoshenko, Zhukov), from 1944 the 3rd Belorussian Front (Chernyakhovsky, Vasilevsky)', type: 'infantry', men: 600000,
+        route: [R('1941-07-10', 'Smolensk'), R('1941-07-25', 'Yartsevo'), R('1941-09-06', 'Yelnya'), R('1941-10-07', 'Vyazma'), R('1941-10-20', 'Mozhaisk'),
+          R('1941-11-25', 'Moscow'), R('1941-12-06', 'Khimki'), R('1941-12-26', 'NaroFominsk'), R('1942-01-20', 'Mozhaisk'), R('1942-08-15', 'Rzhev'),
+          R('1943-03-12', 'Vyazma'), R('1943-09-25', 'Smolensk'), R('1943-11-15', 'Orsha'), R('1944-06-23', 'Orsha'), R('1944-06-28', 'Borisov'),
+          R('1944-07-03', 'Minsk'), R('1944-07-08', 'Molodechno'), R('1944-07-13', 'Vilnius'), R('1944-08-01', 'Kaunas'), R('1944-08-17', 'Vilkaviskis'),
+          R('1944-10-22', 'Gumbinnen'), R('1945-01-22', 'Insterburg'), R('1945-02-10', 'Konigsberg'), R('1945-04-09', 'Konigsberg'), R('1945-04-25', 'Pillau')] },
+      { tag: 'SOV', name: '5th Guards Tank Army (Rotmistrov)', type: 'armor', men: 60000, exit: '1945-03-01',
+        route: [R('1943-07-08', 'Kursk'), R('1943-07-12', 'Prokhorovka'), R('1943-08-23', 'Kharkiv'), R('1943-10-15', 'Kremenchuk'), R('1944-02-17', 'Korsun'),
+          R('1944-03-10', 'Uman'), R('1944-06-23', 'Orsha'), R('1944-06-29', 'Borisov'), R('1944-07-03', 'Minsk'), R('1944-07-13', 'Vilnius'),
+          R('1944-08-10', 'Siauliai'), R('1945-01-26', 'Elbing')] },
+      { tag: 'SOV', name: 'Bryansk Front (Yeryomenko), 1941', type: 'infantry', men: 250000, exit: '1941-10-20',
+        route: [R('1941-08-16', 'Bryansk'), R('1941-09-05', 'Roslavl'), R('1941-10-06', 'Bryansk'), R('1941-10-15', 'Bryansk')] },
+      { tag: 'SOV', name: 'Bryansk and Central Fronts (Rokossovsky), from 1944 the 1st Belorussian Front (Rokossovsky, Zhukov)', type: 'infantry', men: 800000,
+        route: [R('1941-12-10', 'Tula'), R('1942-01-20', 'Kaluga'), R('1942-07-01', 'Voronezh'), R('1943-02-08', 'Kursk'), R('1943-07-05', 'Ponyri'),
+          R('1943-08-05', 'Oryol'), R('1943-09-17', 'Bryansk'), R('1943-10-15', 'Chernihiv'), R('1943-11-26', 'Gomel'), R('1944-02-24', 'Rogachev'),
+          R('1944-06-24', 'Rogachev'), R('1944-06-29', 'Babruysk'), R('1944-07-08', 'Baranovichi'), R('1944-07-20', 'Brest'), R('1944-07-24', 'Lublin'),
+          R('1944-08-01', 'Praga'), R('1945-01-17', 'Warsaw'), R('1945-01-31', 'Kustrin'), R('1945-04-16', 'Seelow'), R('1945-05-02', 'Berlin')] },
+      { tag: 'SOV', name: '2nd Belorussian Front (Zakharov, Rokossovsky)', type: 'infantry', men: 450000,
+        route: [R('1944-04-24', 'Mogilev'), R('1944-06-28', 'Mogilev'), R('1944-07-16', 'Grodno'), R('1944-07-27', 'Bialystok'), R('1944-09-10', 'Lomza'),
+          R('1945-01-14', 'Rozan'), R('1945-01-26', 'Elbing'), R('1945-03-30', 'Danzig'), R('1945-04-26', 'Stettin'), R('1945-05-01', 'Stralsund')] },
+      // ============================================================ the Red Army: the south
+      { tag: 'SOV', name: 'Southwestern Front (Kirponos)', type: 'infantry', men: 700000, exit: '1941-09-26',
+        route: [R('1941-06-22', 'Lviv'), R('1941-06-28', 'Dubno'), R('1941-07-10', 'Zhytomyr'), R('1941-08-05', 'Kyiv'), R('1941-09-19', 'Kyiv'),
+          R('1941-09-22', 'Lokhvytsia')] },
+      { tag: 'SOV', name: 'Southern Front: 6th, 12th and 18th Armies', type: 'infantry', men: 400000, exit: '1941-10-15',
+        route: [R('1941-06-22', 'Chisinau'), R('1941-07-15', 'Vinnytsia'), R('1941-08-05', 'Uman'), R('1941-09-01', 'Dnipro'), R('1941-10-10', 'Melitopol')] },
+      { tag: 'SOV', name: 'Separate Coastal Army (Odesa and Sevastopol)', type: 'infantry', men: 120000, exit: '1942-07-05',
+        route: [R('1941-08-10', 'Odesa'), R('1941-10-16', 'Odesa'), R('1941-10-30', 'Sevastopol'), R('1942-07-04', 'Sevastopol')] },
+      { tag: 'SOV', name: 'Southwestern and Voronezh Fronts, from 1943 the 1st Ukrainian Front (Vatutin, Zhukov, Konev)', type: 'infantry', men: 800000,
+        route: [R('1942-05-12', 'Kharkiv'), R('1942-05-28', 'Valuyki'), R('1942-07-07', 'Voronezh'), R('1943-01-25', 'Voronezh'), R('1943-02-16', 'Kharkiv'),
+          R('1943-03-14', 'Belgorod'), R('1943-07-05', 'Belgorod'), R('1943-08-23', 'Kharkiv'), R('1943-09-25', 'Kremenchuk'), R('1943-11-06', 'Kyiv'),
+          R('1943-12-31', 'Zhytomyr'), R('1944-02-02', 'Rovno'), R('1944-03-25', 'Proskurov'), R('1944-04-15', 'Tarnopol'), R('1944-07-27', 'Lviv'),
+          R('1944-08-10', 'Sandomierz'), R('1945-01-19', 'Krakow'), R('1945-02-15', 'Breslau'), R('1945-04-25', 'Torgau'), R('1945-05-05', 'Dresden'),
+          R('1945-05-09', 'Prague')] },
+      { tag: 'SOV', name: '1st Guards Tank Army (Katukov)', type: 'armor', men: 60000,
+        route: [R('1943-07-05', 'Prokhorovka'), R('1943-08-23', 'Kharkiv'), R('1944-01-10', 'Berdychiv'), R('1944-03-25', 'Kamianets'), R('1944-07-27', 'Lviv'),
+          R('1944-08-10', 'Sandomierz'), R('1945-01-17', 'Warsaw'), R('1945-02-01', 'Kustrin'), R('1945-04-19', 'Seelow'), R('1945-05-02', 'Berlin')] },
+      { tag: 'SOV', name: 'Steppe Front, from 1943 the 2nd Ukrainian Front (Konev, Malinovsky)', type: 'infantry', men: 650000,
+        route: [R('1943-07-12', 'Kursk'), R('1943-08-23', 'Kharkiv'), R('1943-09-29', 'Kremenchuk'), R('1943-12-14', 'Cherkasy'), R('1944-01-08', 'Kirovohrad'),
+          R('1944-02-17', 'Korsun'), R('1944-03-10', 'Uman'), R('1944-04-05', 'Balti'), R('1944-08-20', 'Iasi'), R('1944-08-31', 'Bucharest'),
+          R('1944-10-20', 'Debrecen'), R('1945-02-13', 'Budapest'), R('1945-04-04', 'Bratislava'), R('1945-04-26', 'Brno'), R('1945-05-09', 'Olomouc')] },
+      { tag: 'SOV', name: 'Southern Front, from October 1943 the 4th Ukrainian Front (Tolbukhin)', type: 'infantry', men: 450000, exit: '1944-06-01',
+        route: [R('1943-09-08', 'Stalino'), R('1943-10-23', 'Melitopol'), R('1943-11-03', 'Perekop'), R('1944-04-08', 'Perekop'), R('1944-04-13', 'Simferopol'),
+          R('1944-05-09', 'Sevastopol')] },
+      { tag: 'SOV', name: '3rd Ukrainian Front (Malinovsky, then Tolbukhin)', type: 'infantry', men: 550000,
+        route: [R('1943-10-25', 'Dnipro'), R('1944-02-08', 'Nikopol'), R('1944-03-28', 'Mykolaiv'), R('1944-04-10', 'Odesa'), R('1944-08-24', 'Chisinau'),
+          R('1944-09-08', 'Ruse'), R('1944-10-20', 'Belgrade'), R('1944-12-26', 'Budapest'), R('1945-03-15', 'Szekesfehervar'), R('1945-04-13', 'Vienna')] }
+    ],
+    forts: [
+      { name: 'Brest Fortress', at: at('Brest'), tag: 'SOV', men: 9000, until: '1941-06-30', to: 'GER' },
+      { name: 'Odesa', at: at('Odesa'), tag: 'SOV', men: 80000, from: '1941-08-08', until: '1941-10-16', to: 'ROM' },
+      { name: 'Leningrad', at: at('Leningrad'), tag: 'SOV', men: 200000, from: '1941-09-08', until: '1944-01-27' },
+      { name: 'Moscow', at: at('Moscow'), tag: 'SOV', men: 200000, from: '1941-10-15', until: '1942-01-31' },
+      { name: 'Tula', at: at('Tula'), tag: 'SOV', men: 30000, from: '1941-10-30', until: '1941-12-31' },
+      { name: 'Sevastopol', at: at('Sevastopol'), tag: 'SOV', men: 100000, from: '1941-10-30', until: '1942-07-04', to: 'GER' },
+      { name: 'Kholm', at: at('Kholm'), tag: 'GER', men: 5000, from: '1942-01-21', until: '1942-05-05' },
+      { name: 'Tarnopol', at: at('Tarnopol'), tag: 'GER', men: 4600, from: '1944-03-10', until: '1944-04-15', to: 'SOV' },
+      { name: 'Vilnius', at: at('Vilnius'), tag: 'GER', men: 15000, from: '1944-07-07', until: '1944-07-13', to: 'SOV' },
+      { name: 'Memel', at: at('Memel'), tag: 'GER', men: 25000, from: '1944-10-10', until: '1945-01-28', to: 'SOV' },
+      { name: 'Budapest', at: at('Budapest'), tag: 'GER', men: 80000, from: '1944-12-26', until: '1945-02-13', to: 'SOV' },
+      { name: 'Konigsberg', at: at('Konigsberg'), tag: 'GER', men: 100000, from: '1945-01-29', until: '1945-04-09', to: 'SOV' },
+      { name: 'Breslau', at: at('Breslau'), tag: 'GER', men: 50000, from: '1945-02-15', until: '1945-05-06', to: 'SOV' }
+    ],
+    occupy: [
+      { date: '1941-07-01', by: 'GER', at: [at('Riga')], note: 'the Germans enter Riga' },
+      { date: '1941-07-09', by: 'GER', at: [at('Pskov')], note: 'Pskov falls' },
+      { date: '1941-07-16', by: 'GER', at: [at('Smolensk')], note: 'German troops break into Smolensk' },
+      { date: '1941-08-19', by: 'GER', at: [at('Novgorod')], note: 'Novgorod falls' },
+      { date: '1941-08-28', by: 'GER', at: [at('Tallinn')], note: 'the Soviet fleet evacuates Tallinn under fire' },
+      { date: '1941-09-19', by: 'GER', at: [at('Kyiv')], note: 'Kyiv falls; over 600,000 Soviet soldiers are captured east of the city' },
+      { date: '1941-10-03', by: 'GER', at: [at('Oryol')], note: 'Guderian\'s tanks enter Oryol' },
+      { date: '1941-10-14', by: 'GER', at: [at('Kalinin')], note: 'the Germans take Kalinin' },
+      { date: '1941-10-24', by: 'GER', at: [at('Kharkiv')], note: 'Kharkiv falls' },
+      { date: '1941-12-16', by: 'SOV', at: [at('Kalinin')], note: 'the Red Army retakes Kalinin' },
+      { date: '1941-12-30', by: 'SOV', at: [at('Kaluga')], note: 'Kaluga is retaken' },
+      { date: '1943-01-25', by: 'SOV', at: [at('Voronezh')], note: 'Voronezh is liberated' },
+      { date: '1943-02-08', by: 'SOV', at: [at('Kursk')], note: 'the Red Army retakes Kursk' },
+      { date: '1943-02-16', by: 'SOV', at: [at('Kharkiv')], note: 'Kharkiv is retaken' },
+      { date: '1943-03-14', by: 'GER', at: [at('Kharkiv')], note: 'Manstein retakes Kharkiv' },
+      { date: '1943-08-05', by: 'SOV', at: [at('Oryol'), at('Belgorod')], note: 'Oryol and Belgorod are liberated; Moscow fires its first victory salute' },
+      { date: '1943-08-23', by: 'SOV', at: [at('Kharkiv')], note: 'Kharkiv is liberated for good' },
+      { date: '1943-09-25', by: 'SOV', at: [at('Smolensk')], note: 'Smolensk is liberated' },
+      { date: '1943-11-06', by: 'SOV', at: [at('Kyiv')], note: 'the Red Army enters Kyiv' },
+      { date: '1944-01-27', by: 'SOV', at: [at('Gatchina'), at('Pushkin')], note: 'the siege of Leningrad is lifted after 872 days' },
+      { date: '1944-07-03', by: 'SOV', at: [at('Minsk')], note: 'Minsk is liberated' },
+      { date: '1944-07-24', by: 'SOV', at: [at('Lublin')], note: 'the Red Army takes Lublin and finds the camp at Majdanek' },
+      { date: '1944-07-27', by: 'SOV', at: [at('Lviv'), at('Bialystok'), at('Daugavpils'), at('Siauliai')], note: 'Lviv, Bialystok, Daugavpils and Siauliai fall on one day' },
+      { date: '1944-08-01', by: 'SOV', at: [at('Kaunas')], note: 'the Red Army enters Kaunas' },
+      { date: '1944-09-22', by: 'SOV', at: [at('Tallinn')], note: 'Tallinn falls' },
+      { date: '1944-10-13', by: 'SOV', at: [at('Riga')], note: 'the Red Army enters Riga' },
+      { date: '1945-01-17', by: 'SOV', at: [at('Warsaw')], note: 'the Red Army enters the ruins of Warsaw' },
+      { date: '1945-01-19', by: 'SOV', at: [at('Krakow')], note: 'Krakow is taken undamaged' },
+      { date: '1945-03-30', by: 'SOV', at: [at('Danzig')], note: 'Danzig falls' },
+      { date: '1945-04-13', by: 'SOV', at: [at('Vienna')], note: 'Vienna is taken' },
+      { date: '1945-05-02', by: 'SOV', at: [at('Berlin')], note: 'Berlin surrenders' },
+      { date: '1945-05-09', by: 'SOV', at: [at('Prague'), at('Dresden')], note: 'the Red Army enters Prague' }
+    ],
+    hold: [
+      { by: 'SOV', at: EAST.map(at), until: '1945-08-02', note: 'the Red Army holds the German east and Poland until the Potsdam settlement' },
+      { by: 'SOV', at: ZONE.map(at), until: '1949-10-07', note: 'the Soviet zone of occupation in Germany' }
+    ],
+    battles: [
+      { date: '1941-06-24', name: 'Raseiniai', at: at('Raseiniai'), won: 'a' },
+      { date: '1941-06-27', name: 'Brody-Dubno', at: at('Dubno'), won: 'a' },
+      { date: '1941-07-01', name: 'Bialystok-Minsk', at: at('Navahrudak'), won: 'a' },
+      { date: '1941-07-25', name: 'Smolensk', at: at('Yartsevo'), won: 'a' },
+      { date: '1941-08-05', name: 'Uman', at: at('Uman'), won: 'a' },
+      { date: '1941-09-06', name: 'Yelnya', at: at('Yelnya'), won: 'b' },
+      { date: '1941-09-19', name: 'Kyiv', at: at('Lokhvytsia'), won: 'a' },
+      { date: '1941-10-10', name: 'Vyazma', at: at('Vyazma'), won: 'a' },
+      { date: '1941-10-12', name: 'Bryansk', at: at('Bryansk'), won: 'a' },
+      { date: '1941-12-06', name: 'Moscow', at: at('Khimki'), won: 'b' },
+      { date: '1941-12-10', name: 'Tula', at: at('Tula'), won: 'b' },
+      { date: '1941-12-16', name: 'Kalinin', at: at('Kalinin'), won: 'b' },
+      { date: '1942-03-01', name: 'Demyansk', at: at('Demyansk'), won: null },
+      { date: '1942-05-15', name: 'the Kerch Peninsula', at: at('Kerch'), won: 'a' },
+      { date: '1942-05-22', name: 'Second Kharkiv', at: at('Kharkiv'), won: 'a' },
+      { date: '1942-07-01', name: 'Sevastopol', at: at('Sevastopol'), won: 'a' },
+      { date: '1942-07-07', name: 'Voronezh', at: at('Voronezh'), won: 'a' },
+      { date: '1942-08-20', name: 'Rzhev', at: at('Rzhev'), won: null },
+      { date: '1943-01-15', name: 'Ostrogozhsk-Rossosh', at: at('Korotoyak'), won: 'b' },
+      { date: '1943-01-18', name: 'Operation Iskra', at: at('Shlisselburg'), won: 'b' },
+      { date: '1943-02-16', name: 'Kharkiv', at: at('Kharkiv'), won: 'b' },
+      { date: '1943-03-14', name: 'Third Kharkiv', at: at('Kharkiv'), won: 'a' },
+      { date: '1943-07-08', name: 'Ponyri', at: at('Ponyri'), won: 'b' },
+      { date: '1943-07-12', name: 'Prokhorovka', at: at('Prokhorovka'), won: 'b' },
+      { date: '1943-08-05', name: 'Oryol', at: at('Oryol'), won: 'b' },
+      { date: '1943-08-23', name: 'Fourth Kharkiv', at: at('Kharkiv'), won: 'b' },
+      { date: '1943-09-25', name: 'Smolensk', at: at('Smolensk'), won: 'b' },
+      { date: '1943-11-06', name: 'Kyiv', at: at('Kyiv'), won: 'b' },
+      { date: '1943-11-26', name: 'Gomel', at: at('Gomel'), won: 'b' },
+      { date: '1944-01-27', name: 'Leningrad-Novgorod', at: at('Gatchina'), won: 'b' },
+      { date: '1944-02-17', name: 'Korsun-Shevchenkivskyi', at: at('Korsun'), won: 'b' },
+      { date: '1944-03-01', name: 'Narva', at: at('Narva'), won: 'a' },
+      { date: '1944-04-10', name: 'the Kamianets-Podilskyi pocket', at: at('Kamianets'), won: null },
+      { date: '1944-05-09', name: 'Sevastopol', at: at('Sevastopol'), won: 'b' },
+      { date: '1944-06-26', name: 'Vitebsk', at: at('Vitebsk'), won: 'b' },
+      { date: '1944-06-29', name: 'Bobruisk', at: at('Babruysk'), won: 'b' },
+      { date: '1944-07-03', name: 'Minsk', at: at('Minsk'), won: 'b' },
+      { date: '1944-07-13', name: 'Vilnius', at: at('Vilnius'), won: 'b' },
+      { date: '1944-07-27', name: 'Lviv-Sandomierz', at: at('Lviv'), won: 'b' },
+      { date: '1944-08-18', name: 'Siauliai', at: at('Siauliai'), won: 'a' },
+      { date: '1944-08-24', name: 'Iasi-Kishinev', at: at('Iasi'), won: 'b' },
+      { date: '1944-10-10', name: 'Memel', at: at('Palanga'), won: 'b' },
+      { date: '1944-10-25', name: 'Gumbinnen', at: at('Gumbinnen'), won: 'a' },
+      { date: '1944-10-25', name: 'Debrecen', at: at('Debrecen'), won: 'b' },
+      { date: '1945-01-17', name: 'the Vistula-Oder', at: at('Warsaw'), won: 'b' },
+      { date: '1945-01-25', name: 'East Prussia', at: at('Insterburg'), won: 'b' },
+      { date: '1945-02-13', name: 'Budapest', at: at('Budapest'), won: 'b' },
+      { date: '1945-03-01', name: 'Courland', at: at('Saldus'), won: 'a' },
+      { date: '1945-03-15', name: 'Lake Balaton', at: at('Szekesfehervar'), won: 'b' },
+      { date: '1945-03-29', name: 'Heiligenbeil', at: at('Heiligenbeil'), won: 'b' },
+      { date: '1945-03-30', name: 'Danzig', at: at('Danzig'), won: 'b' },
+      { date: '1945-04-09', name: 'Konigsberg', at: at('Konigsberg'), won: 'b' },
+      { date: '1945-04-18', name: 'the Seelow Heights', at: at('Seelow'), won: 'b' },
+      { date: '1945-05-01', name: 'Berlin', at: at('Berlin'), won: 'b' }
+    ],
+    attrition: [
+      { from: '1941-11-15', to: '1942-02-28', tags: ['GER'], pct: 0.12 },   // the first Russian winter
+      { from: '1944-06-22', to: '1944-08-31', tags: ['GER'], pct: 0.2 }     // the destruction of Army Group Centre
+    ]
+  });
+})();
 
 </script>
 <script>
@@ -14567,6 +15238,7 @@ window.VY = window.VY || {};
     cavalry: { name: 'Cavalry Brigade', atk: 15, def: 9, org: 50, men: 3000, speed: 34, cost: 70, mp: 3000 },
     artillery: { name: 'Artillery Brigade', atk: 20, def: 6, org: 40, men: 2000, speed: 15, cost: 90, mp: 2000 },
     armored_train: { name: 'Armoured Train', atk: 24, def: 14, org: 50, men: 500, speed: 45, cost: 140, mp: 500 },
+    armor: { name: 'Armoured Division', atk: 28, def: 16, org: 60, men: 10000, speed: 40, cost: 260, mp: 10000 },
     garrison: { name: 'Garrison', atk: 4, def: 13, org: 45, men: 800, speed: 0, cost: 0, mp: 800 }
   };
 
@@ -15193,7 +15865,8 @@ window.VY = window.VY || {};
   };
   Game.removeUnits = function (tag, fraction, where) {
     const G = VY.G;
-    let pool = G.units.filter(u => u.tag === tag);
+    // a story's withdrawal never removes the armies of a historical war: their routes take them off the map
+    let pool = G.units.filter(u => u.tag === tag && !u.camp);
     if (where) { const ks = new Set(Game.resolveWhere(where)); pool = pool.filter(u => ks.has(u.state)); }
     const n = Math.round(pool.length * fraction);
     Game.deleteUnits(new Set(pool.slice(0, n).map(u => u.id)));
@@ -16072,7 +16745,7 @@ window.VY = window.VY || {};
     CAMPS = (VY.CAMPAIGNS || []).map(src => {
       const more = parts.filter(x => x.war === src.id);
       const cat = key => (src[key] || []).concat(...more.map(x => x[key] || []));
-      const c = { id: src.id, name: src.name, a: src.a.slice(), b: src.b.slice(), pass: cat('pass'), d0: D(src.start), d1: D(src.end) };
+      const c = { id: src.id, name: src.name, a: src.a.slice(), b: src.b.slice(), pass: cat('pass'), d0: D(src.start), d1: D(src.end), skip: src.skip };
       c.spare = cat('spare').map(x => typeof x === 'string' ? { tag: x, until: c.d1 } : { tag: x[0], until: D(x[1]) });
       c.title = cat('title').map(([d, t]) => ({ day: D(d), t })).sort(byDay);
       c.join = cat('join').map(([d, tag, side]) => ({ day: D(d), tag, side })).sort(byDay);
@@ -16094,6 +16767,8 @@ window.VY = window.VY || {};
 
   // ---------------------------------------------------------------- helpers
   const warOf = c => VY.G.wars.find(w => w.camp === c.id) || VY.G.wars.find(w => w.name === c.name);
+  // 'the War of 1812', 'the Great War' (a name that starts with The keeps one article)
+  const theWar = w => /^the /i.test(w.name) ? 'the ' + w.name.slice(4) : 'the ' + w.name;
   const sideOf = (w, t) => w.a.includes(t) ? 'a' : w.b.includes(t) ? 'b' : null;
   const foes = (w, x, y) => (w.a.includes(x) && w.b.includes(y)) || (w.b.includes(x) && w.a.includes(y));
   const hostileAt = (p, tag) => VY.G.units.some(e => e.prov === p && Game.atWar(tag, e.tag));
@@ -16273,6 +16948,8 @@ window.VY = window.VY || {};
 
   function begin(c) {
     const G = VY.G, st = { done: 0, fort: {}, sp: {}, tp: 0, jp: 0, lp: 0, op: 0, bp: 0 };
+    // an alternate history the war does not fit (the story fights it its own way)
+    if (c.skip && Game.cond(c.skip)) { st.done = 1; return st; }
     const ok = t => t !== G.player && VY.COUNTRY_DEFS[t] && (VY.COUNTRY_DEFS[t].offmap || Game.exists(t));
     const a = c.a.filter(ok), b = c.b.filter(ok);
     if (!a.length || !b.length || a.some(t => Game.friends(t, G.player) && Game.atWarAny(G.player))) { st.done = 1; return st; }
@@ -16320,7 +16997,7 @@ window.VY = window.VY || {};
     });
     const gone = new Set(G.units.filter(u => u.camp === c.id && u.tag === t).map(u => u.id));
     if (gone.size) Game.deleteUnits(gone);
-    if (!G.fast) news(`${Game.countryName(t)} leaves the ${w.title || w.name}.`);
+    if (!G.fast) news(`${Game.countryName(t)} leaves ${theWar(w)}.`);
   }
 
   function forts(c, st, w, day) {
@@ -16422,15 +17099,19 @@ window.VY = window.VY || {};
   function reclaim(c, w) {
     const G = VY.G, pos = { a: [], b: [] };
     for (const u of G.units) if (u.camp === c.id && u.fort === undefined) { const s = sideOf(w, u.tag); if (s) pos[s].push(u.prov); }
-    const near = (list, p, km) => list.some(q => Game.provKm(p, q) < km);
+    const dist = (list, p) => list.reduce((m, q) => Math.min(m, Game.provKm(p, q)), 1e9);
     G.provs.forEach((pv, p) => {
       const ctl = pv.ctrl, own = G.states[P()[p].state].owner;
       if (ctl === own || ctl === G.player || own === G.player) return;
       const sc = sideOf(w, ctl), so = sideOf(w, own);
-      if (!sc || !so || sc === so || FORTP.has(p)) return;
-      // the owner's armies close by and the occupier's gone, or the occupier gone from the whole region
-      if (hostileAt(p, own) || near(pos[sc], p, 100)) return;
-      if (near(pos[so], p, 70) || (!near(pos[sc], p, 350) && near(pos[so], p, 450))) Game.capture(p, own);
+      if (!sc || !so || sc === so || FORTP.has(p) || hostileAt(p, own)) return;
+      // the occupation layer of the world wars (js/data/world.js, world2.js) decides when those districts return
+      if (G.wocc && G.wocc[P()[p].state]) return;
+      // the land is on the owner's side of the front again: the owner's armies close and clearly nearer than the
+      // occupier's, or the occupier gone from the whole region (behind a deep front the occupier's armies are all at
+      // the front line, nearer than the owner's, so the rear stays occupied)
+      const dO = dist(pos[so], p), dC = dist(pos[sc], p);
+      if ((dO < 80 && dC > 100) || (dC > 500 && dO < dC)) Game.capture(p, own);
     });
   }
 
@@ -16503,11 +17184,16 @@ window.VY = window.VY || {};
   // an army holds the ground around it: the next provinces fall to it unless the enemy stands there
   function zoc(w, u) {
     if (u.battle) return;
+    // armies passing each other on the same ground take nothing until one of them has moved on
+    if (campFoeAt(u.prov, u.tag)) return;
+    // nor ground right beside an enemy army: a retreating army does not take back what its pursuer is entering
+    const close = VY.G.units.filter(e => e.camp && e.fort === undefined && Game.atWar(u.tag, e.tag) && Game.provKm(e.prov, u.prov) < 90).map(e => e.prov);
     for (const n of [u.prov].concat(P()[u.prov].neighbors)) {
       const ctl = pctrl(n);
       // our own land too, when we are in the war (the Provisional Government of 1812 as the Russians come back)
       if (ctl === u.tag || !foes(w, u.tag, ctl)) continue;
       if (FORTP.has(n) || hostileAt(n, u.tag) || spared(BYID[u.camp], n, u.tag)) continue;
+      if (close.some(q => Game.provKm(q, n) < 40)) continue;
       Game.capture(n, u.tag);
     }
   }
@@ -16523,7 +17209,7 @@ window.VY = window.VY || {};
         if (G.wocc && G.wocc[k] || s.owner === G.player) return;
         for (const p of VY.STATE_DEFS[k].provs) { const ctl = pctrl(p); if (ctl !== s.owner && all.has(ctl)) Game.setProvController(p, s.owner); }
       });
-      if (!G.fast) news(`Peace: the ${w.title || w.name} is over.`, `<span class="subtle">Peace</span> <b>${U.esc(w.title || w.name)}</b>`);
+      if (!G.fast) news(`Peace: ${theWar(w)} is over.`, `<span class="subtle">Peace</span> <b>${U.esc(w.title || w.name)}</b>`);
     }
     cleanup(c);
     for (const h of c.hold) hold(h);
@@ -17067,10 +17753,12 @@ window.VY = window.VY || {};
         const s = G.states[e.k];
         G.wocc = G.wocc || {};
         if (e.occ === null) { if (G.wocc[e.k]) { if (s.ctrl === G.wocc[e.k]) Game.setController(e.k, s.owner); delete G.wocc[e.k]; } }
-        else if (LINE(s.owner) === LINE(e.owner) && s.ctrl === s.owner && s.owner !== 'LIT') {
+        else if (LINE(s.owner) === LINE(e.owner) && s.owner !== 'LIT') {
           let by = e.occ;
           if (by === 'RUS' && G.countries.SOV.exists && !G.countries.RUS.exists) by = 'SOV';
-          Game.setController(e.k, by); G.wocc[e.k] = by;
+          // a district the armies of a historical war have already taken joins the occupation too, so that it
+          // lasts until the front's own end (the armistice) and not only until a separate peace
+          if (s.ctrl === s.owner || s.ctrl === by) { Game.setController(e.k, by); G.wocc[e.k] = by; }
         }
         continue;
       }
@@ -18903,7 +19591,7 @@ window.VY = window.VY || {};
         owned.sort((a, b) => VY.STATE_DEFS[b].vp - VY.STATE_DEFS[a].vp).forEach(k => sel.appendChild(el('option', { value: k }, VY.STATE_DEFS[k].name)));
         body.appendChild(sel);
         const y = U.yearOf(G.day);
-        const types = ['militia', 'infantry', 'cavalry', 'artillery'].concat(y >= 1915 ? ['armored_train'] : []).concat(G.done && Object.keys(G.done).length > 25 ? ['guards'] : []);
+        const types = ['militia', 'infantry', 'cavalry', 'artillery'].concat(y >= 1915 && y < 1950 ? ['armored_train'] : []).concat(y >= 1930 ? ['armor'] : []).concat(G.done && Object.keys(G.done).length > 25 ? ['guards'] : []);
         const grid = el('div', { class: 'actions' });
         for (const t of types) {
           const T = Game.unitTypes[t], cost = Math.round(T.cost * (1 + (Game.mods().recruitCost || 0)));
